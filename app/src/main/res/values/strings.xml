@@ -1,0 +1,24 @@
+<resources>
+    <!-- Información básica de la aplicación -->
+    <string name="app_name">GameHub</string>
+    <string name="app_theme">Red Social de Videojuegos</string>
+    <string name="app_version">Versión 1.0.0</string>
+
+    <!-- Descripción del propósito -->
+    <string name="app_description">Tu biblioteca personal de videojuegos. Califica, revisa y descubre nuevos títulos junto a una comunidad de gamers apasionados.</string>
+
+    <!-- Elemento de la UI -->
+    <string name="contact_button">Contactar Soporte</string>
+    <string name="email_icon_desc">Icono de enviar correo electrónico</string>
+
+    <!-- Email -->
+    <string name="email_to">soporte@gamelist.com</string>
+    <string name="email_subject">Consulta sobre GameHub - App de Videojuegos</string>
+    <string name="email_body">Hola equipo de GameHub,\n\nMe interesa conocer más sobre la aplicación:\n\n• Sistema de listas y biblioteca personal\n• Comunidad y reseñas de videojuegos\n• Funcionalidades sociales\n• Próximas actualizaciones\n\n¡Gracias por la información!</string>
+    <string name="email_chooser_title">Enviar consulta mediante...</string>
+    <string name="no_email_apps">No se encontraron aplicaciones de email instaladas</string>
+    <string name="chooser_title">Selecciona una aplicación para enviar email</string>
+    <string name="cd_enviar_email">Enviar correo electrónico de contacto</string>
+    <string name="cta_contacto_info">Contactar Soporte</string>
+
+</resources>
