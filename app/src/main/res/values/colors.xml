@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Colores base del logo GameHub -->
+    <color name="gh_blue">#0847A0</color>
+    <color name="gh_red">#D32F2F</color>
+    <color name="gh_black">#121212</color>
+
+    <!-- Colores de apoyo / superficies -->
+    <color name="gh_surface_dark">#1E1E1E</color>
+    <color name="gh_background_light">#F5F5F5</color>
+
+    <!-- Colores personalizados -->
+    <color name="gh_highlight">#64B5F6</color>
+    <color name="gh_favorite">#FFC107</color>
 </resources>
