@@ -3,16 +3,23 @@ package com.example.gamehub
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.model.Game
 import com.example.gamehub.ui.theme.RedGH
+import com.example.gamehub.ui.theme.orbitronFont
 
 // 1. ElemListScreen (Lista General)
 @Composable
@@ -119,5 +126,55 @@ fun ProfileScreen() {
         Button(onClick = { isLoggedIn = !isLoggedIn }) {
             Text(if (isLoggedIn) "Logout" else "Login")
         }
+    }
+}
+
+@Composable
+fun AboutScreen(
+    onEmailClick: () -> Unit = {}
+) {
+    val scroll = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+            .verticalScroll(scroll),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(id = R.string.app_name),
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontFamily = orbitronFont),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(id = R.string.app_theme),
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontFamily = orbitronFont
+            ),
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(id = R.string.app_description),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(Modifier.height(24.dp))
+        AssistChip(
+            onClick = { /* decorativo */ },
+            label = { Text(text = stringResource(id = R.string.app_version)) },
+        )
+        Spacer(Modifier.height(32.dp))
+
+        ExtendedFloatingActionButton(
+            icon = { Icon(Icons.Filled.Email, contentDescription = stringResource(R.string.cd_enviar_email)) },
+            text = { Text(stringResource(R.string.cta_contacto_info)) },
+            onClick = onEmailClick,
+            containerColor = MaterialTheme.colorScheme.secondary
+        )
     }
 }
