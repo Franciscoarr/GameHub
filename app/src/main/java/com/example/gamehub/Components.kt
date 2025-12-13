@@ -1,6 +1,7 @@
 package com.example.gamehub
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,7 +13,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.model.Game
 import com.example.gamehub.ui.theme.FavoriteGH
@@ -42,19 +46,21 @@ fun GameCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Placeholder de imagen
-            Box(
+            Image(
+                painter = painterResource(id = game.imageRes), // Carga la imagen desde el ID del juego
+                contentDescription = "Carátula de ${game.title}", // Descripción para accesibilidad
+                contentScale = ContentScale.Crop, // Recorta la imagen para llenar el cuadrado sin deformar
                 modifier = Modifier
-                    .size(64.dp)
-                    .background(MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(game.title.take(1), color = Color.White)
-            }
+                    .size(64.dp) // Mantiene el tamaño original
+                    .clip(RoundedCornerShape(8.dp)) // Aplica las esquinas redondeadas a la imagen
+            )
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = game.title, style = MaterialTheme.typography.titleMedium)
+                Text(text = game.title, 
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.secondary)
                 Text(
                     text = game.genre,
                     style = MaterialTheme.typography.bodySmall,

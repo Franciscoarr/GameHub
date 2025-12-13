@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.ui.theme.GameHubTheme
 import com.example.gamehub.ui.theme.orbitronFont
@@ -28,11 +27,13 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.*
 import com.example.gamehub.model.mockGames
+import androidx.activity.enableEdgeToEdge
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        actionBar?.hide()
         setContent {
             GameHubTheme {
                 val windowSize = calculateWindowSizeClass(this)
@@ -55,9 +56,9 @@ class MainActivity : ComponentActivity() {
                         if (widthSizeClass == WindowWidthSizeClass.Compact) {
                             NavigationBar {
                                 NavigationBarItem(selected = currentRoute == "list", onClick = { currentRoute = "list" }, icon = { Icon(Icons.Default.Home, "") }, label = { Text("Juegos") })
-                                NavigationBarItem(selected = currentRoute == "favs", onClick = { currentRoute = "favs" }, icon = { Icon(Icons.Default.Star, "") }, label = { Text("Favs") })
+                                NavigationBarItem(selected = currentRoute == "favs", onClick = { currentRoute = "favs" }, icon = { Icon(Icons.Default.Star, "") }, label = { Text("Favoritos") })
                                 NavigationBarItem(selected = currentRoute == "profile", onClick = { currentRoute = "profile" }, icon = { Icon(Icons.Default.Person, "") }, label = { Text("Perfil") })
-                                NavigationBarItem(selected = currentRoute == "about", onClick = { currentRoute = "about" }, icon = { Icon(Icons.Default.Info, "") }, label = { Text("About") })
+                                NavigationBarItem(selected = currentRoute == "about", onClick = { currentRoute = "about" }, icon = { Icon(Icons.Default.Info, "") }, label = { Text("Información") })
                             }
                         }
                     }
@@ -90,7 +91,8 @@ class MainActivity : ComponentActivity() {
                             Row(Modifier.fillMaxSize()) {
                                 // Panel Izquierdo: Navegación Lateral o Lista
                                 NavigationRail {
-                                    NavigationRailItem(selected = currentRoute == "list", onClick = { currentRoute = "list" }, icon = { Icon(Icons.Default.Person, "") })
+                                    NavigationRailItem(selected = currentRoute == "list", onClick = { currentRoute = "list" }, icon = { Icon(Icons.Default.Home, "") })
+                                    NavigationRailItem(selected = currentRoute == "favs", onClick = { currentRoute = "favs" }, icon = { Icon(Icons.Default.Star, "") })
                                     NavigationRailItem(selected = currentRoute == "profile", onClick = { currentRoute = "profile" }, icon = { Icon(Icons.Default.Person, "") })
                                     NavigationRailItem(selected = currentRoute == "about", onClick = { currentRoute = "about" }, icon = { Icon(Icons.Default.Info, "") })
                                 }
@@ -111,6 +113,8 @@ class MainActivity : ComponentActivity() {
                                     }
                                 } else if (currentRoute == "about") {
                                     AboutScreen()
+                                } else if (currentRoute == "favs") {
+                                    FavListScreen(games, { }, onFavToggle)
                                 } else {
                                     ProfileScreen()
                                 }
@@ -170,19 +174,5 @@ fun AboutScreen(
             onClick = onEmailClick,
             containerColor = MaterialTheme.colorScheme.secondary
         )
-    }
-}
-
-@Preview(
-    name = "GameHub – Dark",
-    showBackground = true,
-    showSystemUi = true
-)
-@Composable
-fun PreviewAboutDark() {
-    GameHubTheme {
-        Surface(Modifier.fillMaxSize()) {
-            AboutScreen()
-        }
     }
 }
