@@ -69,6 +69,21 @@ class MainActivity : ComponentActivity() {
                         if (widthSizeClass == WindowWidthSizeClass.Compact) {
                             // --- VISTA COMPACTA (Móvil) ---
                             when (currentRoute) {
+                                "detail_fav" -> {
+                                    val game = games.find { it.id == selectedGameId }
+
+                                    // Si encontramos el juego, mostramos tu pantalla especial
+                                    if (game != null) {
+                                        Column {
+                                            // Botón para volver específicamente a Favoritos
+                                            Button(onClick = { currentRoute = "favs" }) {
+                                                Text("Volver a Favoritos")
+                                            }
+                                            // Aquí mostramos TU pantalla con los comentarios
+                                            DetailFavScreen(game)
+                                        }
+                                    }
+                                }
                                 "list" -> ElemListScreen(games, onGameClick = {
                                     selectedGameId = it.id
                                     currentRoute = "detail"
@@ -81,7 +96,10 @@ class MainActivity : ComponentActivity() {
                                         DetailItemScreen(game, onFavToggle)
                                     }
                                 }
-                                "favs" -> FavListScreen(games, { }, onFavToggle)
+                                "favs" -> FavListScreen(games, onGameClick = {
+                                    selectedGameId = it.id
+                                    currentRoute = "detail_fav" // <--- Cambiamos a la nueva ruta
+                                }, onFavToggle)
                                 "profile" -> ProfileScreen()
                                 "about" -> AboutScreen()
                             }
@@ -114,7 +132,36 @@ class MainActivity : ComponentActivity() {
                                 } else if (currentRoute == "about") {
                                     AboutScreen()
                                 } else if (currentRoute == "favs") {
-                                    FavListScreen(games, { }, onFavToggle)
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        FavListScreen(
+                                            games = games,
+                                            { selectedGameId = it.id }, // Solo seleccionamos, no navegamos
+                                            onFavToggle
+                                        )
+                                    }
+
+                                    // 2. Panel Derecho: Los comentarios (DetailFavScreen)
+                                    Box(modifier = Modifier.weight(1.5f).padding(16.dp)) {
+                                        val game = games.find { it.id == selectedGameId }
+
+                                        if (game != null) {
+                                            // AQUI ESTÁ LA CLAVE: Usamos DetailFavScreen en lugar de DetailItemScreen
+                                            // para que se vean los comentarios a la derecha.
+                                            DetailFavScreen(game)
+                                        } else {
+                                            // Mensaje vacío cuando no has seleccionado nada
+                                            Column(
+                                                modifier = Modifier.align(Alignment.Center),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(
+                                                    "Selecciona un favorito para ver los comentarios",
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
                                 } else {
                                     ProfileScreen()
                                 }

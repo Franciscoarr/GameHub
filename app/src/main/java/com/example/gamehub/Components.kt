@@ -17,9 +17,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.model.Game
 import com.example.gamehub.ui.theme.FavoriteGH
+import com.example.gamehub.ui.theme.orbitronFont
 
 // --- COMPONENTE 1: Tarjeta de Elemento (GameCard) ---
 // Justificación: Tarjeta elevada con borde de acento, diseñada para destacar la acción de favoritos.
@@ -59,7 +61,8 @@ fun GameCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = game.title, 
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = orbitronFont),
                     color = MaterialTheme.colorScheme.secondary)
                 Text(
                     text = game.genre,

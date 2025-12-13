@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.*
@@ -91,7 +92,7 @@ fun DetailFavScreen(game: Game) {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = { /* Lógica añadir comentario */ }) {
-                Icon(Icons.Default.Add, contentDescription = "Comentar")
+                Icon(Icons.Default.AddComment, contentDescription = "Comentar")
             }
         }
     ) { padding ->
