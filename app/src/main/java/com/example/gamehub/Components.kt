@@ -2,7 +2,6 @@ package com.example.gamehub
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,14 +16,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.model.Game
 import com.example.gamehub.ui.theme.FavoriteGH
 import com.example.gamehub.ui.theme.orbitronFont
 
-// --- COMPONENTE 1: Tarjeta de Elemento (GameCard) ---
-// Justificación: Tarjeta elevada con borde de acento, diseñada para destacar la acción de favoritos.
+//COMPONENTE 1: GameCard
 @Composable
 fun GameCard(
     game: Game,
@@ -47,14 +44,14 @@ fun GameCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Placeholder de imagen
+            //Placeholder de imagen
             Image(
-                painter = painterResource(id = game.imageRes), // Carga la imagen desde el ID del juego
-                contentDescription = "Carátula de ${game.title}", // Descripción para accesibilidad
-                contentScale = ContentScale.Crop, // Recorta la imagen para llenar el cuadrado sin deformar
+                painter = painterResource(id = game.imageRes),
+                contentDescription = "Carátula de ${game.title}",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(64.dp) // Mantiene el tamaño original
-                    .clip(RoundedCornerShape(8.dp)) // Aplica las esquinas redondeadas a la imagen
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(8.dp))
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -69,7 +66,7 @@ fun GameCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
-                // Uso del componente personalizado 2 dentro del 1
+                //Uso del componente personalizado 2 dentro del 1
                 RatingBadge(rating = game.rating)
             }
 
@@ -84,8 +81,7 @@ fun GameCard(
     }
 }
 
-// --- COMPONENTE 2: Badge de Puntuación (RatingBadge) ---
-// Justificación: Un "Chip" visual simple que usa nuestro color personalizado 'CustomGold' para resaltar la calidad.
+//COMPONENTE 2: RatingBadge
 @Composable
 fun RatingBadge(rating: Double) {
     Surface(

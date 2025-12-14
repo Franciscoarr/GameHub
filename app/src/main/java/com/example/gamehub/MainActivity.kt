@@ -4,20 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.ui.theme.GameHubTheme
-import com.example.gamehub.ui.theme.orbitronFont
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
@@ -27,7 +19,6 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.*
 import com.example.gamehub.model.mockGames
-import androidx.activity.enableEdgeToEdge
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -39,10 +30,8 @@ class MainActivity : ComponentActivity() {
                 val windowSize = calculateWindowSizeClass(this)
                 val widthSizeClass = windowSize.widthSizeClass
 
-                // Estado Global simple para la demo
                 var games by remember { mutableStateOf(mockGames) }
 
-                // Lógica de navegación simple
                 var currentRoute by remember { mutableStateOf("list") }
                 var selectedGameId by remember { mutableStateOf<Int?>(null) }
 
@@ -50,7 +39,7 @@ class MainActivity : ComponentActivity() {
                     games = games.map { if (it.id == id) it.copy(isFavorite = !it.isFavorite) else it }
                 }
 
-                // Layout Principal con BottomBar para móvil
+                //Layout Principal
                 Scaffold(
                     bottomBar = {
                         if (widthSizeClass == WindowWidthSizeClass.Compact) {
@@ -65,21 +54,18 @@ class MainActivity : ComponentActivity() {
                 ) { padding ->
                     Box(modifier = Modifier.padding(padding)) {
 
-                        // LÓGICA DE AUTOMATIZACIÓN DE PANTALLAS
+                        //Auomatización de pantallas
                         if (widthSizeClass == WindowWidthSizeClass.Compact) {
-                            // --- VISTA COMPACTA (Móvil) ---
+                            //Vista Móvil
                             when (currentRoute) {
                                 "detail_fav" -> {
                                     val game = games.find { it.id == selectedGameId }
 
-                                    // Si encontramos el juego, mostramos tu pantalla especial
                                     if (game != null) {
                                         Column {
-                                            // Botón para volver específicamente a Favoritos
                                             Button(onClick = { currentRoute = "favs" }) {
                                                 Text("Volver a Favoritos")
                                             }
-                                            // Aquí mostramos TU pantalla con los comentarios
                                             DetailFavScreen(game)
                                         }
                                     }
@@ -90,7 +76,6 @@ class MainActivity : ComponentActivity() {
                                 }, onFavToggle)
                                 "detail" -> {
                                     val game = games.find { it.id == selectedGameId }
-                                    // Botón atrás simple simulado
                                     Column {
                                         Button(onClick = { currentRoute = "list" }) { Text("Volver") }
                                         DetailItemScreen(game, onFavToggle)
@@ -98,16 +83,15 @@ class MainActivity : ComponentActivity() {
                                 }
                                 "favs" -> FavListScreen(games, onGameClick = {
                                     selectedGameId = it.id
-                                    currentRoute = "detail_fav" // <--- Cambiamos a la nueva ruta
+                                    currentRoute = "detail_fav"
                                 }, onFavToggle)
                                 "profile" -> ProfileScreen()
                                 "about" -> AboutScreen()
                             }
                         } else {
-                            // --- VISTA EXPANDIDA (Tablet/Foldable) ---
-                            // Variante Master-Detail (Lista a la izquierda, Detalle a la derecha)
+                            //Vista Tablet
                             Row(Modifier.fillMaxSize()) {
-                                // Panel Izquierdo: Navegación Lateral o Lista
+                                //Panel Izquierdo
                                 NavigationRail {
                                     NavigationRailItem(selected = currentRoute == "list", onClick = { currentRoute = "list" }, icon = { Icon(Icons.Default.Home, "") })
                                     NavigationRailItem(selected = currentRoute == "favs", onClick = { currentRoute = "favs" }, icon = { Icon(Icons.Default.Star, "") })
@@ -115,12 +99,12 @@ class MainActivity : ComponentActivity() {
                                     NavigationRailItem(selected = currentRoute == "about", onClick = { currentRoute = "about" }, icon = { Icon(Icons.Default.Info, "") })
                                 }
 
-                                // Contenido Central
+                                //Contenido Central
                                 if (currentRoute == "list") {
                                     Box(modifier = Modifier.weight(1f)) {
                                         ElemListScreen(games, onGameClick = { selectedGameId = it.id }, onFavToggle)
                                     }
-                                    // Panel Derecho (Detalle) siempre visible
+                                    //Panel Derecho
                                     Box(modifier = Modifier.weight(1.5f).padding(16.dp)) {
                                         val game = games.find { it.id == selectedGameId }
                                         if (game != null) {
@@ -135,21 +119,18 @@ class MainActivity : ComponentActivity() {
                                     Box(modifier = Modifier.weight(1f)) {
                                         FavListScreen(
                                             games = games,
-                                            { selectedGameId = it.id }, // Solo seleccionamos, no navegamos
+                                            { selectedGameId = it.id },
                                             onFavToggle
                                         )
                                     }
 
-                                    // 2. Panel Derecho: Los comentarios (DetailFavScreen)
+                                    //Panel Derecho
                                     Box(modifier = Modifier.weight(1.5f).padding(16.dp)) {
                                         val game = games.find { it.id == selectedGameId }
 
                                         if (game != null) {
-                                            // AQUI ESTÁ LA CLAVE: Usamos DetailFavScreen en lugar de DetailItemScreen
-                                            // para que se vean los comentarios a la derecha.
                                             DetailFavScreen(game)
                                         } else {
-                                            // Mensaje vacío cuando no has seleccionado nada
                                             Column(
                                                 modifier = Modifier.align(Alignment.Center),
                                                 horizontalAlignment = Alignment.CenterHorizontally

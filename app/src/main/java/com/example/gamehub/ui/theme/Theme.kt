@@ -11,7 +11,7 @@ public val RedGH = Color(0xFFD32F2F)
 public val BlackGH = Color(0xFF121212)
 public val SurfaceDarkGH = Color(0xFF1E1E1E)
 
-// ⭐ COLORES PERSONALIZADOS
+//COLORES PERSONALIZADOS
 val HighlightGH = Color(0xFF7825BE)
 val FavoriteGH = Color(0xFFFFC107)
 

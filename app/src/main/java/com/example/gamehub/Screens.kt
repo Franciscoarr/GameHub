@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
@@ -14,7 +13,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,7 +21,7 @@ import com.example.gamehub.model.Game
 import com.example.gamehub.ui.theme.RedGH
 import com.example.gamehub.ui.theme.orbitronFont
 
-// 1. ElemListScreen (Lista General)
+//1. ElemListScreen (Lista General)
 @Composable
 fun ElemListScreen(
     games: List<Game>,
@@ -41,7 +39,7 @@ fun ElemListScreen(
     }
 }
 
-// 2. DetailItemScreen (Detalle General)
+//2. DetailItemScreen (Detalle General)
 @Composable
 fun DetailItemScreen(game: Game?, onFavToggle: (Int) -> Unit) {
     if (game == null) {
@@ -67,7 +65,7 @@ fun DetailItemScreen(game: Game?, onFavToggle: (Int) -> Unit) {
     }
 }
 
-// 3. FavListScreen (Lista Favoritos)
+//3. FavListScreen (Lista Favoritos)
 @Composable
 fun FavListScreen(
     games: List<Game>,
@@ -87,7 +85,7 @@ fun FavListScreen(
     }
 }
 
-// 4. DetailFavScreen (Detalle Favorito con Comentarios)
+//4. DetailFavScreen (Detalle Favorito con Comentarios)
 @Composable
 fun DetailFavScreen(game: Game) {
     Scaffold(
@@ -114,7 +112,7 @@ fun DetailFavScreen(game: Game) {
     }
 }
 
-// 5. ProfileScreen
+//5. ProfileScreen (Perfil)
 @Composable
 fun ProfileScreen() {
     var isLoggedIn by remember { mutableStateOf(false) }
@@ -131,6 +129,7 @@ fun ProfileScreen() {
     }
 }
 
+//6. AboutScreen (Sobre la aplicación)
 @Composable
 fun AboutScreen(
     onEmailClick: () -> Unit = {}
@@ -167,7 +166,7 @@ fun AboutScreen(
         )
         Spacer(Modifier.height(24.dp))
         AssistChip(
-            onClick = { /* decorativo */ },
+            onClick = {  },
             label = { Text(text = stringResource(id = R.string.app_version)) },
             colors = AssistChipDefaults.assistChipColors(labelColor = MaterialTheme.colorScheme.tertiary),
         )
