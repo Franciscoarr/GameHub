@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -168,6 +169,7 @@ fun AboutScreen(
         AssistChip(
             onClick = { /* decorativo */ },
             label = { Text(text = stringResource(id = R.string.app_version)) },
+            colors = AssistChipDefaults.assistChipColors(labelColor = MaterialTheme.colorScheme.tertiary),
         )
         Spacer(Modifier.height(32.dp))
 

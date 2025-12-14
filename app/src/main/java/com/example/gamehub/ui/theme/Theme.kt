@@ -1,16 +1,10 @@
 package com.example.gamehub.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
 public val BlueGH = Color(0xFF0D47A1)
 public val RedGH = Color(0xFFD32F2F)
@@ -18,7 +12,7 @@ public val BlackGH = Color(0xFF121212)
 public val SurfaceDarkGH = Color(0xFF1E1E1E)
 
 // ⭐ COLORES PERSONALIZADOS
-val HighlightGH = Color(0xFF64B5F6)
+val HighlightGH = Color(0xFF7825BE)
 val FavoriteGH = Color(0xFFFFC107)
 
 private val GameHubDarkColors = darkColorScheme(

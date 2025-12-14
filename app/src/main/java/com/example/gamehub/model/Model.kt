@@ -65,5 +65,15 @@ val mockGames = listOf(
         isFavorite = false,
         rating = 4.6,
         comments = listOf("Muy difícil pero gratificante", "Items infinitos")
+    ),
+    Game(
+        id = 6,
+        title = "Tropico 5",
+        description = "Vuelve 'El Presidente'. Gestiona tu isla caribeña desde la época colonial hasta el futuro en su quinta entrega.",
+        genre = "Strategy",
+        imageRes = R.drawable.tropico5,
+        isFavorite = true,
+        rating = 4.4,
+        comments = listOf("¡Viva El Presidente!", "La gestión política es muy divertida", "Penúltimo es muy sexy")
     )
 )
