@@ -6,13 +6,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -88,26 +91,41 @@ fun FavListScreen(
 //4. DetailFavScreen (Detalle Favorito con Comentarios)
 @Composable
 fun DetailFavScreen(game: Game) {
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(onClick = { /* Lógica añadir comentario */ }) {
-                Icon(Icons.Default.AddComment, contentDescription = "Comentar")
-            }
-        }
-    ) { padding ->
-        Column(Modifier.padding(padding).padding(16.dp)) {
-            Text(game.title, style = MaterialTheme.typography.headlineMedium)
-            Text("Comentarios:", style = MaterialTheme.typography.titleMedium)
-            LazyColumn {
-                items(game.comments) { comment ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                    ) {
-                        Text(comment, modifier = Modifier.padding(8.dp))
-                    }
+    // Quitamos el Scaffold y el LazyColumn para evitar el CRASH con el scroll padre
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(game.title, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        Text("Tus Comentarios:", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+
+        // Usamos forEach en lugar de LazyColumn porque el Scroll ya lo tiene la caja contenedora
+        if (game.comments.isNotEmpty()) {
+            game.comments.forEach { comment ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Text(
+                        text = comment,
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
+        } else {
+            Text("No hay comentarios aún.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Botón decorativo de añadir comentario
+        Button(onClick = { /* Lógica futura */ }) {
+            Icon(Icons.Default.Add, "Añadir")
+            Spacer(Modifier.width(8.dp))
+            Text("Añadir comentario")
         }
     }
 }
@@ -115,16 +133,37 @@ fun DetailFavScreen(game: Game) {
 //5. ProfileScreen (Perfil)
 @Composable
 fun ProfileScreen() {
+    // Estado local para controlar si el usuario está logueado o no
     var isLoggedIn by remember { mutableStateOf(false) }
+
     Column(
-        Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(if (isLoggedIn) "Usuario: Gamer123" else "Invitado", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(16.dp))
-        Button(onClick = { isLoggedIn = !isLoggedIn }) {
-            Text(if (isLoggedIn) "Logout" else "Login")
+        Icon(
+            imageVector = Icons.Default.Person,
+            contentDescription = null,
+            modifier = Modifier.size(100.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = if (isLoggedIn) "Usuario: Gamer123" else "Modo Invitado",
+            style = MaterialTheme.typography.headlineSmall
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = { isLoggedIn = !isLoggedIn }, // Cambia el estado al pulsar
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isLoggedIn) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+            )
+        ) {
+            // El texto cambia según el estado
+            Text(text = if (isLoggedIn) "Cerrar Sesión (Logout)" else "Iniciar Sesión (Login)")
         }
     }
 }
