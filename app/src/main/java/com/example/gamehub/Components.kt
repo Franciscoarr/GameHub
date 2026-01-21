@@ -15,13 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.model.Game
-import com.example.gamehub.ui.theme.FavoriteGH
-import com.example.gamehub.ui.theme.orbitronFont
 
-//COMPONENTE 1: GameCard
 @Composable
 fun GameCard(
     game: Game,
@@ -44,7 +42,6 @@ fun GameCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            //Placeholder de imagen
             Image(
                 painter = painterResource(id = game.imageRes),
                 contentDescription = "Carátula de ${game.title}",
@@ -57,16 +54,14 @@ fun GameCard(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = game.title, 
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontFamily = orbitronFont),
+                Text(text = game.title,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.secondary)
                 Text(
                     text = game.genre,
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
-                //Uso del componente personalizado 2 dentro del 1
                 RatingBadge(rating = game.rating)
             }
 
@@ -74,24 +69,25 @@ fun GameCard(
                 Icon(
                     imageVector = if (game.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Favorito",
-                    tint = if (game.isFavorite) MaterialTheme.colorScheme.primary else Color.Gray
+                    tint = if (game.isFavorite) colorResource(R.color.gh_blue) else Color.Gray
                 )
             }
         }
     }
 }
 
-//COMPONENTE 2: RatingBadge
 @Composable
 fun RatingBadge(rating: Double) {
+    val favoriteColor = colorResource(R.color.gh_favorite)
+
     Surface(
-        color = FavoriteGH.copy(alpha = 0.2f),
+        color = favoriteColor.copy(alpha = 0.2f),
         shape = RoundedCornerShape(4.dp),
-        border = BorderStroke(1.dp, FavoriteGH)
+        border = BorderStroke(1.dp, favoriteColor)
     ) {
         Text(
             text = "★ $rating",
-            color = FavoriteGH,
+            color = favoriteColor,
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
         )

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.GameHub" parent="android:ThemeOverlay.Material.Dark.ActionBar"/>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.GameHub" parent="android:ThemeOverlay.Material.Dark.ActionBar">
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="27">shortEdges</item>
+    </style>
 </resources>

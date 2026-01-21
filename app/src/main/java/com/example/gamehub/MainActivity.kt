@@ -3,13 +3,12 @@ package com.example.gamehub
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -17,126 +16,97 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.gamehub.model.mockGames
-import com.example.gamehub.model.Game
 import com.example.gamehub.ui.theme.GameHubTheme
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         actionBar?.hide()
+        //Pantalla completa
+        //Esto permite que la app dibuje detrás de las barras
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            val attrib = window.attributes
+            attrib.layoutInDisplayCutoutMode = android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            window.attributes = attrib
+        }
+
+        //Ocultar barras
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+        insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         setContent {
             GameHubTheme {
+                //Cálculo del tamaño de ventana para adaptabilidad
                 val windowSize = calculateWindowSizeClass(this)
                 val widthSizeClass = windowSize.widthSizeClass
 
-                // --- ESTADOS ---
+                //Estado de los juegos
                 var games by remember { mutableStateOf(mockGames) }
+
+                //Navegación y estado
                 var currentRoute by remember { mutableStateOf("list") }
                 var selectedGameId by remember { mutableStateOf<Int?>(null) }
-                var searchQuery by remember { mutableStateOf("") }
-                var gameToDelete by remember { mutableStateOf<Game?>(null) }
 
-                // --- FILTRADO ---
-                val displayedGames = if (searchQuery.isEmpty()) {
-                    games
-                } else {
-                    games.filter { it.title.contains(searchQuery, ignoreCase = true) }
-                }
-
+                //Lógica para añadir/quitar favoritos
                 val onFavToggle: (Int) -> Unit = { id ->
-                    val game = games.find { it.id == id }
-                    if (game != null) {
-                        if (game.isFavorite) {
-                            gameToDelete = game
-                        } else {
-                            games = games.map { if (it.id == id) it.copy(isFavorite = true) else it }
-                        }
-                    }
-                }
-
-                // --- DIÁLOGO BORRAR FAVORITO ---
-                if (gameToDelete != null) {
-                    AlertDialog(
-                        onDismissRequest = { gameToDelete = null },
-                        title = { Text("Eliminar de Favoritos") },
-                        text = { Text("¿Quitar ${gameToDelete?.title} de la lista?") },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                games = games.map { if (it.id == gameToDelete?.id) it.copy(isFavorite = false) else it }
-                                gameToDelete = null
-                            }) { Text("Eliminar", color = Color.Red) }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { gameToDelete = null }) { Text("Cancelar") }
-                        }
-                    )
+                    games = games.map { if (it.id == id) it.copy(isFavorite = !it.isFavorite) else it }
                 }
 
                 Scaffold(
                     bottomBar = {
+                        //Solo mostramos BottomBar en modo Compacto
                         if (widthSizeClass == WindowWidthSizeClass.Compact) {
                             NavigationBar {
-                                NavigationBarItem(selected = currentRoute == "list", onClick = { currentRoute = "list" }, icon = { Icon(Icons.Default.Home, "") }, label = { Text("Lista") })
-                                NavigationBarItem(selected = currentRoute == "favs", onClick = { currentRoute = "favs" }, icon = { Icon(Icons.Default.Star, "") }, label = { Text("Favs") })
-                                NavigationBarItem(selected = currentRoute == "profile", onClick = { currentRoute = "profile" }, icon = { Icon(Icons.Default.Person, "") }, label = { Text("Perfil") })
-                                NavigationBarItem(selected = currentRoute == "about", onClick = { currentRoute = "about" }, icon = { Icon(Icons.Default.Info, "") }, label = { Text("Info") })
+                                NavigationBarItem(selected = currentRoute == "list", onClick = { currentRoute = "list" }, icon = { Icon(Icons.Default.Home, "Juegos") }, label = { Text("Juegos") })
+                                NavigationBarItem(selected = currentRoute == "favs", onClick = { currentRoute = "favs" }, icon = { Icon(Icons.Default.Star, "Favoritos") }, label = { Text("Favoritos") })
+                                NavigationBarItem(selected = currentRoute == "profile", onClick = { currentRoute = "profile" }, icon = { Icon(Icons.Default.Person, "Perfil") }, label = { Text("Perfil") })
+                                NavigationBarItem(selected = currentRoute == "about", onClick = { currentRoute = "about" }, icon = { Icon(Icons.Default.Info, "Info") }, label = { Text("Info") })
                             }
                         }
                     }
                 ) { padding ->
-
-                    // LÓGICA DEL HUECO:
-                    // En vertical (Compact) respetamos el padding de arriba (status bar).
-                    // En horizontal (Else) lo ignoramos para ganar espacio y que no quede el hueco feo.
-                    val mainModifier = if (widthSizeClass == WindowWidthSizeClass.Compact) {
-                        Modifier.padding(padding).fillMaxSize()
-                    } else {
-                        // En horizontal solo aplicamos padding abajo (si hubiera barra) e izquierda/derecha
-                        Modifier.padding(
-                            bottom = padding.calculateBottomPadding(),
-                            start = padding.calculateStartPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                            end = padding.calculateEndPadding(androidx.compose.ui.unit.LayoutDirection.Ltr)
-                        ).fillMaxSize()
-                    }
-
-                    Box(modifier = mainModifier) {
+                    Box(modifier = Modifier.padding(padding)) {
 
                         if (widthSizeClass == WindowWidthSizeClass.Compact) {
-                            // --- VISTA MÓVIL VERTICAL ---
+                            //VISTA MÓVIL
                             when (currentRoute) {
-                                "list" -> Column {
-                                    BeautifulSearchBar(searchQuery) { searchQuery = it }
-                                    ElemListScreen(displayedGames, onGameClick = {
+                                "list" -> ElemListScreen(
+                                    games = games,
+                                    onGameClick = {
                                         selectedGameId = it.id
                                         currentRoute = "detail"
-                                    }, onFavToggle)
-                                }
+                                    },
+                                    onFavToggle = onFavToggle
+                                )
                                 "detail" -> {
                                     val game = games.find { it.id == selectedGameId }
-                                    if (game != null) {
-                                        Column {
-                                            IconButton(onClick = { currentRoute = "list" }) { Icon(Icons.Default.ArrowBack, "Volver") }
-                                            DetailItemScreen(game, onFavToggle)
-                                        }
+                                    Column {
+                                        Button(onClick = { currentRoute = "list" }, modifier = Modifier.padding(8.dp)) { Text("Volver a Lista") }
+                                        DetailItemScreen(game, onFavToggle)
                                     }
                                 }
-                                "favs" -> FavListScreen(games, onGameClick = {
-                                    selectedGameId = it.id
-                                    currentRoute = "detail_fav"
-                                }, onFavToggle)
+                                "favs" -> FavListScreen(
+                                    games = games,
+                                    onGameClick = {
+                                        selectedGameId = it.id
+                                        currentRoute = "detail_fav"
+                                    },
+                                    onRemoveFav = onFavToggle
+                                )
                                 "detail_fav" -> {
                                     val game = games.find { it.id == selectedGameId }
                                     if (game != null) {
                                         Column {
-                                            IconButton(onClick = { currentRoute = "favs" }) { Icon(Icons.Default.ArrowBack, "Volver") }
-                                            DetailFavScreen(game) // Recuerda usar la versión corregida arriba
+                                            Button(onClick = { currentRoute = "favs" }, modifier = Modifier.padding(8.dp)) { Text("Volver a Favoritos") }
+                                            DetailFavScreen(game)
                                         }
                                     }
                                 }
@@ -144,74 +114,50 @@ class MainActivity : ComponentActivity() {
                                 "about" -> AboutScreen()
                             }
                         } else {
-                            // --- VISTA HORIZONTAL ---
+                            //VISTA TABLET
                             Row(Modifier.fillMaxSize()) {
-
-                                // 1. RAIL LATERAL (Con Scroll por si la pantalla es bajita)
-                                NavigationRail(
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxHeight()
-                                            .verticalScroll(rememberScrollState()) // Permite mover el menú si no cabe
-                                            .width(80.dp), // Ancho fijo para que no baile
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        NavigationRailItem(selected = currentRoute == "list", onClick = { currentRoute = "list" }, icon = { Icon(Icons.Default.Home, "Lista") }, label = { Text("Juegos") })
-                                        Spacer(Modifier.height(10.dp))
-                                        NavigationRailItem(selected = currentRoute == "favs", onClick = { currentRoute = "favs" }, icon = { Icon(Icons.Default.Star, "Favs") }, label = { Text("Favs") })
-                                        Spacer(Modifier.height(10.dp))
-                                        NavigationRailItem(selected = currentRoute == "profile", onClick = { currentRoute = "profile" }, icon = { Icon(Icons.Default.Person, "Perfil") }, label = { Text("Perfil") })
-                                        Spacer(Modifier.height(10.dp))
-                                        NavigationRailItem(selected = currentRoute == "about", onClick = { currentRoute = "about" }, icon = { Icon(Icons.Default.Info, "Info") }, label = { Text("Info") })
-                                    }
+                                //Panel Izquierdo
+                                NavigationRail {
+                                    Spacer(Modifier.weight(1f))
+                                    NavigationRailItem(selected = currentRoute == "list", onClick = { currentRoute = "list" }, icon = { Icon(Icons.Default.Home, "") }, label = { Text("Home") })
+                                    NavigationRailItem(selected = currentRoute == "favs", onClick = { currentRoute = "favs" }, icon = { Icon(Icons.Default.Star, "") }, label = { Text("Favs") })
+                                    NavigationRailItem(selected = currentRoute == "profile", onClick = { currentRoute = "profile" }, icon = { Icon(Icons.Default.Person, "") }, label = { Text("Perfil") })
+                                    NavigationRailItem(selected = currentRoute == "about", onClick = { currentRoute = "about" }, icon = { Icon(Icons.Default.Info, "") }, label = { Text("Info") })
+                                    Spacer(Modifier.weight(1f))
                                 }
 
-                                // 2. ZONA CENTRAL
+                                //Contenido
                                 Box(modifier = Modifier.weight(1f)) {
-                                    when (currentRoute) {
+                                    when(currentRoute) {
                                         "list" -> {
-                                            Row(Modifier.fillMaxSize()) {
-                                                // IZQUIERDA: LISTA Y BUSCADOR
-                                                Column(modifier = Modifier.weight(1f)) {
-                                                    BeautifulSearchBar(searchQuery) { searchQuery = it }
-                                                    ElemListScreen(displayedGames, onGameClick = { selectedGameId = it.id }, onFavToggle)
+                                            Row {
+                                                Box(Modifier.weight(1f)) {
+                                                    ElemListScreen(games, onGameClick = { selectedGameId = it.id }, onFavToggle)
                                                 }
-                                                // DERECHA: DETALLES
-                                                Box(modifier = Modifier
-                                                    .weight(1f)
-                                                    .padding(16.dp)
-                                                    .verticalScroll(rememberScrollState()) // Scroll permitido aquí
-                                                ) {
+                                                //Panel de Detalle a la derecha
+                                                Box(Modifier.weight(1f).padding(16.dp)) {
                                                     val game = games.find { it.id == selectedGameId }
                                                     if (game != null) DetailItemScreen(game, onFavToggle)
-                                                    else EmptySelectionMessage("Selecciona un juego para ver detalles")
+                                                    else Text("Selecciona un juego", Modifier.align(Alignment.Center))
                                                 }
                                             }
                                         }
                                         "favs" -> {
-                                            Row(Modifier.fillMaxSize()) {
-                                                // IZQUIERDA: LISTA FAVS
-                                                Box(modifier = Modifier.weight(1f)) {
-                                                    FavListScreen(games, { selectedGameId = it.id }, onFavToggle)
+                                            Row {
+                                                Box(Modifier.weight(1f)) {
+                                                    FavListScreen(games, { selectedGameId = it.id }, onRemoveFav = onFavToggle)
                                                 }
-                                                // DERECHA: COMENTARIOS (Aquí crasheaba antes)
-                                                Box(modifier = Modifier
-                                                    .weight(1f)
-                                                    .padding(16.dp)
-                                                    .verticalScroll(rememberScrollState()) // Scroll del padre
-                                                ) {
+                                                //Panel de Detalle Favoritos a la derecha
+                                                Box(Modifier.weight(1f).padding(16.dp)) {
                                                     val game = games.find { it.id == selectedGameId }
-                                                    // Usamos el DetailFavScreen CORREGIDO (sin lazycolumn interna)
-                                                    if (game != null && game.isFavorite) DetailFavScreen(game)
-                                                    else EmptySelectionMessage("Selecciona un favorito")
+                                                    if (game != null) DetailFavScreen(game)
+                                                    else Text("Selecciona un favorito", Modifier.align(Alignment.Center))
                                                 }
                                             }
                                         }
                                         "profile" -> ProfileScreen()
                                         "about" -> AboutScreen()
+                                        else -> AboutScreen()
                                     }
                                 }
                             }
