@@ -45,7 +45,7 @@ fun GameCard(
         ) {
             Image(
                 painter = painterResource(id = game.imageRes),
-                // Usamos stringResource con el ID del título
+                //Usamos stringResource con el ID del título
                 contentDescription = stringResource(R.string.game_image_desc, stringResource(game.titleRes)),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -56,11 +56,11 @@ fun GameCard(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                // Título desde recursos
+                //Título desde recursos
                 Text(text = stringResource(game.titleRes),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.secondary)
-                // Género desde recursos
+                //Género desde recursos
                 Text(
                     text = stringResource(game.genreRes),
                     style = MaterialTheme.typography.bodySmall,

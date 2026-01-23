@@ -16,14 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.model.Game
 
-// 1. ElemListScreen: Filtra por COMIENZO del título (Primera letra)
+//1. ElemListScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ElemListScreen(
@@ -97,7 +96,7 @@ fun ElemListScreen(
     }
 }
 
-// 2. FavListScreen: Filtra por COMIENZO del título (Primera letra)
+//2. FavListScreen
 @Composable
 fun FavListScreen(
     games: List<Game>,
@@ -188,7 +187,7 @@ fun FavListScreen(
     }
 }
 
-// 3. DetailItemScreen (Sin cambios)
+//3. DetailItemScreen
 @Composable
 fun DetailItemScreen(game: Game?, onFavToggle: (Int) -> Unit) {
     if (game == null) return
@@ -245,7 +244,7 @@ fun DetailItemScreen(game: Game?, onFavToggle: (Int) -> Unit) {
     }
 }
 
-// 4. DetailFavScreen (Sin cambios)
+//4. DetailFavScreen
 @Composable
 fun DetailFavScreen(game: Game) {
     Scaffold(
@@ -276,7 +275,7 @@ fun DetailFavScreen(game: Game) {
     }
 }
 
-// 5. ProfileScreen (Sin cambios)
+//5. ProfileScreen
 @Composable
 fun ProfileScreen() {
     var isLoggedIn by remember { mutableStateOf(false) }
@@ -301,7 +300,7 @@ fun ProfileScreen() {
     }
 }
 
-// 6. AboutScreen (Sin cambios)
+//6. AboutScreen
 @Composable
 fun AboutScreen() {
     val scroll = rememberScrollState()

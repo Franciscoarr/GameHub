@@ -6,16 +6,16 @@ import com.example.gamehub.R
 
 data class Game(
     val id: Int,
-    @StringRes val titleRes: Int,       // Cambio clave: Int en vez de String
-    @StringRes val descriptionRes: Int, // Cambio clave
-    @StringRes val genreRes: Int,       // Cambio clave
+    @StringRes val titleRes: Int,
+    @StringRes val descriptionRes: Int,
+    @StringRes val genreRes: Int,
     @DrawableRes val imageRes: Int,
     val isFavorite: Boolean = false,
     val rating: Double = 4.5,
-    @StringRes val commentsRes: List<Int> = emptyList() // Lista de IDs
+    @StringRes val commentsRes: List<Int> = emptyList() //Lista de IDs
 )
 
-// Datos de prueba usando R.string
+//Datos de prueba
 val mockGames = listOf(
     Game(
         id = 1,
