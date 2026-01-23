@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.model.Game
 
@@ -44,7 +45,8 @@ fun GameCard(
         ) {
             Image(
                 painter = painterResource(id = game.imageRes),
-                contentDescription = "Carátula de ${game.title}",
+                // Usamos stringResource con el ID del título
+                contentDescription = stringResource(R.string.game_image_desc, stringResource(game.titleRes)),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(64.dp)
@@ -54,11 +56,13 @@ fun GameCard(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = game.title,
+                // Título desde recursos
+                Text(text = stringResource(game.titleRes),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.secondary)
+                // Género desde recursos
                 Text(
-                    text = game.genre,
+                    text = stringResource(game.genreRes),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
@@ -68,7 +72,7 @@ fun GameCard(
             IconButton(onClick = onFavClick) {
                 Icon(
                     imageVector = if (game.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Favorito",
+                    contentDescription = stringResource(R.string.fav_icon_desc),
                     tint = if (game.isFavorite) colorResource(R.color.gh_blue) else Color.Gray
                 )
             }

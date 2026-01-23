@@ -1,2 +1,90 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">GameHub</string>
+    <string name="app_theme">Video Game Social Network</string>
+    <string name="app_version">Version 1.0.0</string>
+    <string name="app_description">Your personal video game library. Rate, review, and discover new titles alongside a community of passionate gamers.</string>
+
+    <string name="contact_button">Contact Support</string>
+    <string name="email_icon_desc">Send email icon</string>
+    <string name="email_to">support@gamelist.com</string>
+    <string name="email_subject">Inquiry regarding GameHub - Video Game App</string>
+    <string name="email_body">Hello GameHub team,\n\nI am interested in knowing more about the app:\n\n• List system and personal library\n• Community and video game reviews\n• Social features\n• Upcoming updates\n\nThanks for the information!</string>
+    <string name="email_chooser_title">Send inquiry via...</string>
+    <string name="no_email_apps">No email apps found</string>
+    <string name="chooser_title">Select an app to send email</string>
+    <string name="cd_enviar_email">Send contact email</string>
+    <string name="cta_contacto_info">Contact Support</string>
+
+    <string name="nav_games">Games</string>
+    <string name="nav_favs">Favorites</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_info">Info</string>
+    <string name="nav_rail_home">Home</string>
+    <string name="nav_rail_favs">Favs</string>
+    <string name="back_to_list">Back to List</string>
+    <string name="back_to_favs">Back to Favorites</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes_delete">Yes, delete</string>
+
+    <string name="search_placeholder">Search game...</string>
+    <string name="remove_fav_title">Remove from Favorites</string>
+    <string name="remove_fav_msg">Do you want to remove %1$s from your favorites?</string>
+
+    <string name="remove_fav_confirm_title">Remove from Favorites</string>
+    <string name="remove_fav_confirm_msg">Are you sure you want to remove this game from your list?</string>
+    <string name="no_favs_yet">You don\'t have any favorites yet.</string>
+
+    <string name="genre_label">Genre: %1$s</string>
+    <string name="remove_fav_detail_msg">Do you wish to remove %1$s from favorites?</string>
+    <string name="fav_remove_btn">Favorite (Remove)</string>
+    <string name="fav_add_btn">Add to Favorites</string>
+    <string name="comments_title">Comments:</string>
+    <string name="select_game_hint">Select a game</string>
+    <string name="select_fav_hint">Select a favorite</string>
+    <string name="add_comment_desc">Comment</string>
+
+    <string name="user_profile">User: Gamer123</string>
+    <string name="guest_user">Guest</string>
+    <string name="logout">Log Out</string>
+    <string name="login">Log In</string>
+
+    <string name="game_image_desc">Cover art of %1$s</string>
+    <string name="fav_icon_desc">Favorite</string>
+
+    <string name="game1_title">Plants vs. Zombies: Garden Warfare 2</string>
+    <string name="game1_desc">The battle for Suburbia grows. A chaotic, fun, and action-packed plant-based shooter</string>
+    <string name="genre_shooter">Shooter</string>
+    <string name="game1_c1">The best shooter to relax</string>
+    <string name="game1_c2">Peashooter OP</string>
+
+    <string name="game2_title">Yakuza 0</string>
+    <string name="game2_desc">Japan, 1988. Kiryu and Majima fight for control in a story of crime, money, and karaoke</string>
+    <string name="genre_rpg">Action RPG</string>
+    <string name="game2_c1">The story is incredible</string>
+    <string name="game2_c2">Majima is the best character</string>
+
+    <string name="game3_title">Terraria</string>
+    <string name="game3_desc">Dig, fight, explore, build. The world is at your fingertips in this sandbox adventure</string>
+    <string name="genre_sandbox">Sandbox</string>
+    <string name="game3_c1">Infinite hours of gameplay</string>
+    <string name="game3_c2">Watch out for the Wall of Flesh</string>
+
+    <string name="game4_title">Balatro</string>
+    <string name="game4_desc">A poker-based deck-building roguelike. Hypnotic, addictive, and brilliant</string>
+    <string name="genre_roguelike">Roguelike</string>
+    <string name="game4_c1">I can\'t stop playing</string>
+    <string name="game4_c2">Just one more round...</string>
+
+    <string name="game5_title">The Binding of Isaac</string>
+    <string name="game5_desc">A randomly generated action RPG shooter with very dark roguelike elements</string>
+    <string name="game5_c1">Very hard but rewarding</string>
+    <string name="game5_c2">Infinite items</string>
+
+    <string name="game6_title">Tropico 5</string>
+    <string name="game6_desc">\'El Presidente\' returns. Manage your Caribbean island from the colonial era to the future in this fifth installment.</string>
+    <string name="genre_strategy">Strategy</string>
+    <string name="game6_c1">Long live El Presidente!</string>
+    <string name="game6_c2">Political management is very fun</string>
+    <string name="game6_c3">Penúltimo is very sexy</string>
+</resources>

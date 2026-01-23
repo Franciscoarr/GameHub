@@ -1,20 +1,90 @@
 <resources>
     <string name="app_name">GameHub</string>
-    <string name="app_theme">Video Game Social Network</string>
-    <string name="app_version">Version 1.0.0</string>
+    <string name="app_theme">Red Social de Videojuegos</string>
+    <string name="app_version">Versión 1.0.0</string>
+    <string name="app_description">Tu biblioteca personal de videojuegos. Califica, reseña y descubre nuevos títulos junto a una comunidad de jugadores apasionados.</string>
 
-    <string name="app_description">Your personal video game library. Rate, review, and discover new titles alongside a community of passionate gamers.</string>
-
-    <string name="contact_button">Contact Support</string>
-    <string name="email_icon_desc">Send email icon</string>
-
+    <string name="contact_button">Contactar Soporte</string>
+    <string name="email_icon_desc">Icono enviar correo</string>
     <string name="email_to">soporte@gamelist.com</string>
-    <string name="email_subject">Inquiry about GameHub - Video Game App</string>
-    <string name="email_body">Hello GameHub team,\n\nI am interested in learning more about the application:\n\n• List system and personal library\n• Community and video game reviews\n• Social features\n• Upcoming updates\n\nThanks for the information!</string>
-    <string name="email_chooser_title">Send inquiry via...</string>
-    <string name="no_email_apps">No email applications found</string>
-    <string name="chooser_title">Select an app to send email</string>
-    <string name="cd_enviar_email">Send contact email</string>
-    <string name="cta_contacto_info">Contact Support</string>
+    <string name="email_subject">Consulta sobre GameHub - App de Videojuegos</string>
+    <string name="email_body">Hola equipo de GameHub,\n\nEstoy interesado en saber más sobre la aplicación:\n\n• Sistema de listas y biblioteca personal\n• Comunidad y reseñas de videojuegos\n• Funciones sociales\n• Próximas actualizaciones\n\n¡Gracias por la información!</string>
+    <string name="email_chooser_title">Enviar consulta vía...</string>
+    <string name="no_email_apps">No se encontraron aplicaciones de correo</string>
+    <string name="chooser_title">Selecciona una app para enviar correo</string>
+    <string name="cd_enviar_email">Enviar correo de contacto</string>
+    <string name="cta_contacto_info">Contactar Soporte</string>
 
+    <string name="nav_games">Juegos</string>
+    <string name="nav_favs">Favoritos</string>
+    <string name="nav_profile">Perfil</string>
+    <string name="nav_info">Info</string>
+    <string name="nav_rail_home">Home</string>
+    <string name="nav_rail_favs">Favs</string>
+    <string name="back_to_list">Volver a Lista</string>
+    <string name="back_to_favs">Volver a Favoritos</string>
+    <string name="delete">Eliminar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="yes_delete">Sí, borrar</string>
+
+    <string name="search_placeholder">Buscar juego...</string>
+    <string name="remove_fav_title">Quitar de Favoritos</string>
+    <string name="remove_fav_msg">¿Quieres eliminar %1$s de tus favoritos?</string>
+
+    <string name="remove_fav_confirm_title">Eliminar de Favoritos</string>
+    <string name="remove_fav_confirm_msg">¿Estás seguro de que deseas quitar este juego de tu lista?</string>
+    <string name="no_favs_yet">No tienes favoritos aún.</string>
+
+    <string name="genre_label">Género: %1$s</string>
+    <string name="remove_fav_detail_msg">¿Deseas eliminar %1$s de favoritos?</string>
+    <string name="fav_remove_btn">Favorito (Quitar)</string>
+    <string name="fav_add_btn">Añadir a Favoritos</string>
+    <string name="comments_title">Comentarios:</string>
+    <string name="select_game_hint">Selecciona un juego</string>
+    <string name="select_fav_hint">Selecciona un favorito</string>
+    <string name="add_comment_desc">Comentar</string>
+
+    <string name="user_profile">Usuario: Gamer123</string>
+    <string name="guest_user">Invitado</string>
+    <string name="logout">Cerrar Sesión (Logout)</string>
+    <string name="login">Iniciar Sesión (Login)</string>
+
+    <string name="game_image_desc">Carátula de %1$s</string>
+    <string name="fav_icon_desc">Favorito</string>
+
+    <string name="game1_title">Plants vs. Zombies: Garden Warfare 2</string>
+    <string name="game1_desc">La batalla por Suburbia crece. Un shooter caótico, divertido y lleno de acción vegetal</string>
+    <string name="genre_shooter">Shooter</string>
+    <string name="game1_c1">El mejor shooter para relajarse</string>
+    <string name="game1_c2">Lanzaguisantes OP</string>
+
+    <string name="game2_title">Yakuza 0</string>
+    <string name="game2_desc">Japón, 1988. Kiryu y Majima luchan por el control en una historia de crimen, dinero y karaoke</string>
+    <string name="genre_rpg">Action RPG</string>
+    <string name="game2_c1">La historia es increíble</string>
+    <string name="game2_c2">Majima es el mejor personaje</string>
+
+    <string name="game3_title">Terraria</string>
+    <string name="game3_desc">Excava, lucha, explora, construye. El mundo está en tus manos en esta aventura sandbox</string>
+    <string name="genre_sandbox">Sandbox</string>
+    <string name="game3_c1">Horas infinitas de juego</string>
+    <string name="game3_c2">Cuidado con el Muro de Carne</string>
+
+    <string name="game4_title">Balatro</string>
+    <string name="game4_desc">Un roguelike de construcción de mazos basado en el póker. Hipnótico, adictivo y genial</string>
+    <string name="genre_roguelike">Roguelike</string>
+    <string name="game4_c1">No puedo dejar de jugar</string>
+    <string name="game4_c2">Solo una ronda más...</string>
+
+    <string name="game5_title">The Binding of Isaac</string>
+    <string name="game5_desc">Un shooter RPG de acción generado aleatoriamente con elementos roguelike muy oscuros</string>
+    <string name="game5_c1">Muy difícil pero gratificante</string>
+    <string name="game5_c2">Items infinitos</string>
+
+    <string name="game6_title">Tropico 5</string>
+    <string name="game6_desc">Vuelve \'El Presidente\'. Gestiona tu isla caribeña desde la época colonial hasta el futuro en su quinta entrega.</string>
+    <string name="genre_strategy">Strategy</string>
+    <string name="game6_c1">¡Viva El Presidente!</string>
+    <string name="game6_c2">La gestión política es muy divertida</string>
+    <string name="game6_c3">Penúltimo es muy sexy</string>
 </resources>

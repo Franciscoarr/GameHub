@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.gamehub.model.Game
 
-//ElemListScreen
+// 1. ElemListScreen: Filtra por COMIENZO del título (Primera letra)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ElemListScreen(
@@ -32,45 +32,44 @@ fun ElemListScreen(
     onFavToggle: (Int) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-
-    //Estados para el diálogo de confirmación
     var showRemoveDialog by remember { mutableStateOf(false) }
     var gameToRemove by remember { mutableStateOf<Game?>(null) }
 
-    val filteredGames = games.filter {
-        it.title.contains(searchQuery, ignoreCase = true) ||
-                it.description.contains(searchQuery, ignoreCase = true)
+    val context = LocalContext.current
+
+    val filteredGames = games.filter { game ->
+        val title = context.getString(game.titleRes)
+        // CAMBIO: Usamos startsWith para filtrar por la primera letra/comienzo
+        title.startsWith(searchQuery, ignoreCase = true)
     }
 
-    //Lógica del Diálogo
     if (showRemoveDialog && gameToRemove != null) {
         AlertDialog(
             onDismissRequest = { showRemoveDialog = false },
-            title = { Text("Quitar de Favoritos") },
-            text = { Text("¿Quieres eliminar ${gameToRemove?.title} de tus favoritos?") },
+            title = { Text(stringResource(R.string.remove_fav_title)) },
+            text = { Text(stringResource(R.string.remove_fav_msg, stringResource(gameToRemove!!.titleRes))) },
             confirmButton = {
                 TextButton(onClick = {
                     onFavToggle(gameToRemove!!.id)
                     showRemoveDialog = false
                     gameToRemove = null
                 }) {
-                    Text("Eliminar", color = colorResource(R.color.gh_red))
+                    Text(stringResource(R.string.delete), color = colorResource(R.color.gh_red))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRemoveDialog = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
     }
 
     Column(Modifier.fillMaxSize()) {
-        //Barra de búsqueda pegada arriba
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            label = { Text("Buscar juego...") },
+            label = { Text(stringResource(R.string.search_placeholder)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -85,7 +84,6 @@ fun ElemListScreen(
                     game = game,
                     onClick = { onGameClick(game) },
                     onFavClick = {
-                        //Si ya es favorito, pedir confirmación. Si no, añadir directo
                         if (game.isFavorite) {
                             gameToRemove = game
                             showRemoveDialog = true
@@ -99,60 +97,90 @@ fun ElemListScreen(
     }
 }
 
-//FavListScreen
+// 2. FavListScreen: Filtra por COMIENZO del título (Primera letra)
 @Composable
 fun FavListScreen(
     games: List<Game>,
     onGameClick: (Game) -> Unit,
     onRemoveFav: (Int) -> Unit
 ) {
-    val favs = games.filter { it.isFavorite }
+    var searchQuery by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    val favs = games.filter { game ->
+        val isFav = game.isFavorite
+        val title = context.getString(game.titleRes)
+
+        // CAMBIO: Usamos startsWith también aquí
+        isFav && title.startsWith(searchQuery, ignoreCase = true)
+    }
+
     var showDeleteDialog by remember { mutableStateOf(false) }
     var gameToDeleteId by remember { mutableStateOf<Int?>(null) }
 
     if (showDeleteDialog && gameToDeleteId != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Eliminar de Favoritos") },
-            text = { Text("¿Estás seguro de que deseas quitar este juego de tu lista?") },
+            title = { Text(stringResource(R.string.remove_fav_confirm_title)) },
+            text = { Text(stringResource(R.string.remove_fav_confirm_msg)) },
             confirmButton = {
                 TextButton(onClick = {
                     onRemoveFav(gameToDeleteId!!)
                     showDeleteDialog = false
                     gameToDeleteId = null
                 }) {
-                    Text("Sí, borrar", color = colorResource(R.color.gh_red))
+                    Text(stringResource(R.string.yes_delete), color = colorResource(R.color.gh_red))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancelar") }
+                TextButton(onClick = { showDeleteDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
 
-    if (favs.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No tienes favoritos aún.")
-        }
-    } else {
-        LazyColumn {
-            items(favs) { game ->
-                Row(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    GameCard(
-                        game = game,
-                        onClick = { onGameClick(game) },
-                        onFavClick = {
-                            //En esta lista desactivamos el click del corazón o lo redirigimos al diálogo
+    Column(Modifier.fillMaxSize()) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            label = { Text(stringResource(R.string.search_placeholder)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            leadingIcon = { Icon(Icons.Default.Search, "") },
+            singleLine = true,
+            shape = MaterialTheme.shapes.medium
+        )
+
+        if (favs.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                if (searchQuery.isEmpty()) {
+                    Text(stringResource(R.string.no_favs_yet))
+                } else {
+                    Text("No hay resultados que empiecen por \"$searchQuery\"")
+                }
+            }
+        } else {
+            LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
+                items(favs) { game ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        GameCard(
+                            game = game,
+                            onClick = { onGameClick(game) },
+                            onFavClick = {
+                                gameToDeleteId = game.id
+                                showDeleteDialog = true
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(onClick = {
                             gameToDeleteId = game.id
                             showDeleteDialog = true
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(onClick = {
-                        gameToDeleteId = game.id
-                        showDeleteDialog = true
-                    }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = colorResource(R.color.gh_red))
+                        }) {
+                            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = colorResource(R.color.gh_red))
+                        }
                     }
                 }
             }
@@ -160,50 +188,46 @@ fun FavListScreen(
     }
 }
 
-//DetailItemScreen
+// 3. DetailItemScreen (Sin cambios)
 @Composable
 fun DetailItemScreen(game: Game?, onFavToggle: (Int) -> Unit) {
     if (game == null) return
 
-    //Estado para el diálogo en la pantalla de detalle
     var showRemoveDialog by remember { mutableStateOf(false) }
 
     if (showRemoveDialog) {
         AlertDialog(
             onDismissRequest = { showRemoveDialog = false },
-            title = { Text("Quitar de Favoritos") },
-            text = { Text("¿Deseas eliminar ${game.title} de favoritos?") },
+            title = { Text(stringResource(R.string.remove_fav_title)) },
+            text = { Text(stringResource(R.string.remove_fav_detail_msg, stringResource(game.titleRes))) },
             confirmButton = {
                 TextButton(onClick = {
                     onFavToggle(game.id)
                     showRemoveDialog = false
                 }) {
-                    Text("Eliminar", color = colorResource(R.color.gh_red))
+                    Text(stringResource(R.string.delete), color = colorResource(R.color.gh_red))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showRemoveDialog = false }) { Text("Cancelar") }
+                TextButton(onClick = { showRemoveDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
 
     Column(Modifier.padding(24.dp).fillMaxSize().verticalScroll(rememberScrollState())) {
-        Text(text = game.title, style = MaterialTheme.typography.headlineMedium)
-        Text(text = "Género: ${game.genre}", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+        Text(text = stringResource(game.titleRes), style = MaterialTheme.typography.headlineMedium)
+        Text(text = stringResource(R.string.genre_label, stringResource(game.genreRes)), style = MaterialTheme.typography.labelLarge, color = Color.Gray)
         Spacer(Modifier.height(8.dp))
 
         Button(
             onClick = {
                 if (game.isFavorite) {
-                    // Si ya es favorito, mostramos diálogo para quitar
                     showRemoveDialog = true
                 } else {
-                    // Si no lo es, añadimos directo
                     onFavToggle(game.id)
                 }
             },
             colors = ButtonDefaults.buttonColors(
-                // Azul (gh_blue) si es favorito, Primary si no
                 containerColor = if (game.isFavorite) colorResource(R.color.gh_blue) else MaterialTheme.colorScheme.primary
             )
         ) {
@@ -213,15 +237,15 @@ fun DetailItemScreen(game: Game?, onFavToggle: (Int) -> Unit) {
                 modifier = Modifier.size(18.dp)
             )
             Spacer(Modifier.width(8.dp))
-            Text(if (game.isFavorite) "Favorito (Quitar)" else "Añadir a Favoritos")
+            Text(if (game.isFavorite) stringResource(R.string.fav_remove_btn) else stringResource(R.string.fav_add_btn))
         }
 
         Spacer(Modifier.height(16.dp))
-        Text(text = game.description, style = MaterialTheme.typography.bodyLarge)
+        Text(text = stringResource(game.descriptionRes), style = MaterialTheme.typography.bodyLarge)
     }
 }
 
-//DetailFavScreen
+// 4. DetailFavScreen (Sin cambios)
 @Composable
 fun DetailFavScreen(game: Game) {
     Scaffold(
@@ -230,21 +254,21 @@ fun DetailFavScreen(game: Game) {
                 onClick = { /* Lógica añadir comentario */ },
                 containerColor = colorResource(R.color.gh_highlight)
             ) {
-                Icon(Icons.Default.AddComment, contentDescription = "Comentar", tint = Color.Black)
+                Icon(Icons.Default.AddComment, contentDescription = stringResource(R.string.add_comment_desc), tint = Color.Black)
             }
         }
     ) { padding ->
         Column(Modifier.padding(padding).padding(16.dp)) {
-            Text(game.title, style = MaterialTheme.typography.headlineMedium)
+            Text(stringResource(game.titleRes), style = MaterialTheme.typography.headlineMedium)
             Divider(Modifier.padding(vertical = 8.dp))
-            Text("Comentarios:", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.comments_title), style = MaterialTheme.typography.titleMedium)
             LazyColumn {
-                items(game.comments) { comment ->
+                items(game.commentsRes) { commentResId ->
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        Text(comment, modifier = Modifier.padding(12.dp))
+                        Text(stringResource(commentResId), modifier = Modifier.padding(12.dp))
                     }
                 }
             }
@@ -252,7 +276,7 @@ fun DetailFavScreen(game: Game) {
     }
 }
 
-//ProfileScreen
+// 5. ProfileScreen (Sin cambios)
 @Composable
 fun ProfileScreen() {
     var isLoggedIn by remember { mutableStateOf(false) }
@@ -263,7 +287,7 @@ fun ProfileScreen() {
     ) {
         Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(100.dp))
         Spacer(Modifier.height(16.dp))
-        Text(if (isLoggedIn) "Usuario: Gamer123" else "Invitado", style = MaterialTheme.typography.headlineMedium)
+        Text(if (isLoggedIn) stringResource(R.string.user_profile) else stringResource(R.string.guest_user), style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(16.dp))
 
         Button(
@@ -272,12 +296,12 @@ fun ProfileScreen() {
                 containerColor = if (isLoggedIn) colorResource(R.color.gh_surface_dark) else MaterialTheme.colorScheme.primary
             )
         ) {
-            Text(if (isLoggedIn) "Cerrar Sesión (Logout)" else "Iniciar Sesión (Login)")
+            Text(if (isLoggedIn) stringResource(R.string.logout) else stringResource(R.string.login))
         }
     }
 }
 
-//AboutScreen
+// 6. AboutScreen (Sin cambios)
 @Composable
 fun AboutScreen() {
     val scroll = rememberScrollState()

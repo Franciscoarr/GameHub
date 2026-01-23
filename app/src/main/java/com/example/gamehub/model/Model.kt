@@ -1,79 +1,80 @@
 package com.example.gamehub.model
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import com.example.gamehub.R
 
 data class Game(
     val id: Int,
-    val title: String,
-    val description: String,
-    val genre: String,
+    @StringRes val titleRes: Int,       // Cambio clave: Int en vez de String
+    @StringRes val descriptionRes: Int, // Cambio clave
+    @StringRes val genreRes: Int,       // Cambio clave
     @DrawableRes val imageRes: Int,
     val isFavorite: Boolean = false,
     val rating: Double = 4.5,
-    val comments: List<String> = emptyList()
+    @StringRes val commentsRes: List<Int> = emptyList() // Lista de IDs
 )
 
-// Datos de prueba
+// Datos de prueba usando R.string
 val mockGames = listOf(
     Game(
         id = 1,
-        title = "Plants vs. Zombies: Garden Warfare 2",
-        description = "La batalla por Suburbia crece. Un shooter caótico, divertido y lleno de acción vegetal",
-        genre = "Shooter",
+        titleRes = R.string.game1_title,
+        descriptionRes = R.string.game1_desc,
+        genreRes = R.string.genre_shooter,
         imageRes = R.drawable.pvzgw2,
         isFavorite = true,
         rating = 4.7,
-        comments = listOf("El mejor shooter para relajarse", "Lanzaguisantes OP")
+        commentsRes = listOf(R.string.game1_c1, R.string.game1_c2)
     ),
     Game(
         id = 2,
-        title = "Yakuza 0",
-        description = "Japón, 1988. Kiryu y Majima luchan por el control en una historia de crimen, dinero y karaoke",
-        genre = "Action RPG",
+        titleRes = R.string.game2_title,
+        descriptionRes = R.string.game2_desc,
+        genreRes = R.string.genre_rpg,
         imageRes = R.drawable.yakuza0,
         isFavorite = true,
         rating = 4.9,
-        comments = listOf("La historia es increíble", "Majima es el mejor personaje")
+        commentsRes = listOf(R.string.game2_c1, R.string.game2_c2)
     ),
     Game(
         id = 3,
-        title = "Terraria",
-        description = "Excava, lucha, explora, construye. El mundo está en tus manos en esta aventura sandbox",
-        genre = "Sandbox",
+        titleRes = R.string.game3_title,
+        descriptionRes = R.string.game3_desc,
+        genreRes = R.string.genre_sandbox,
         imageRes = R.drawable.terraria,
         isFavorite = false,
         rating = 4.8,
-        comments = listOf("Horas infinitas de juego", "Cuidado con el Muro de Carne")
+        commentsRes = listOf(R.string.game3_c1, R.string.game3_c2)
     ),
     Game(
         id = 4,
-        title = "Balatro",
-        description = "Un roguelike de construcción de mazos basado en el póker. Hipnótico, adictivo y genial",
-        genre = "Roguelike",
+        titleRes = R.string.game4_title,
+        descriptionRes = R.string.game4_desc,
+        genreRes = R.string.genre_roguelike,
         imageRes = R.drawable.balatro,
         isFavorite = true,
         rating = 5.0,
-        comments = listOf("No puedo dejar de jugar", "Solo una ronda más...")
+        commentsRes = listOf(R.string.game4_c1, R.string.game4_c2)
     ),
     Game(
         id = 5,
-        title = "The Binding of Isaac",
-        description = "Un shooter RPG de acción generado aleatoriamente con elementos roguelike muy oscuros",
-        genre = "Roguelike",
+        titleRes = R.string.game5_title,
+        descriptionRes = R.string.game5_desc,
+        genreRes = R.string.genre_roguelike,
         imageRes = R.drawable.isaac,
         isFavorite = false,
         rating = 4.6,
-        comments = listOf("Muy difícil pero gratificante", "Items infinitos")
+        commentsRes = listOf(R.string.game5_c1, R.string.game5_c2)
     ),
     Game(
         id = 6,
-        title = "Tropico 5",
-        description = "Vuelve 'El Presidente'. Gestiona tu isla caribeña desde la época colonial hasta el futuro en su quinta entrega.",
-        genre = "Strategy",
+        titleRes = R.string.game6_title,
+        descriptionRes = R.string.game6_desc,
+        genreRes = R.string.genre_strategy,
         imageRes = R.drawable.tropico5,
         isFavorite = true,
         rating = 4.4,
-        comments = listOf("¡Viva El Presidente!", "La gestión política es muy divertida", "Penúltimo es muy sexy")
+        commentsRes = listOf(R.string.game6_c1, R.string.game6_c2, R.string.game6_c3)
     )
 )
