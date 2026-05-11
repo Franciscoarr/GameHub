@@ -3,8 +3,10 @@ package com.example.gamehub
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
@@ -21,10 +23,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.example.gamehub.model.mockGames
+import com.example.gamehub.model.FavoriteGame
+import com.example.gamehub.model.IGDBGame
+import com.example.gamehub.ui.GameViewModel
 import com.example.gamehub.ui.theme.GameHubTheme
 
 class MainActivity : ComponentActivity() {
+    private val viewModel: GameViewModel by viewModels()
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,30 +49,28 @@ class MainActivity : ComponentActivity() {
         insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            GameHubTheme {
+            val settings by viewModel.userSettings.collectAsState()
+
+            GameHubTheme(appTheme = settings.theme) {
                 val windowSize = calculateWindowSizeClass(this)
                 val widthSizeClass = windowSize.widthSizeClass
 
-                var games by remember { mutableStateOf(mockGames) }
                 var currentRoute by remember { mutableStateOf("list") }
-                var selectedGameId by remember { mutableStateOf<Int?>(null) }
-
-                val onFavToggle: (Int) -> Unit = { id ->
-                    games = games.map { if (it.id == id) it.copy(isFavorite = !it.isFavorite) else it }
-                }
+                var selectedGame by remember { mutableStateOf<IGDBGame?>(null) }
+                var selectedFav by remember { mutableStateOf<FavoriteGame?>(null) }
 
                 Scaffold(
                     bottomBar = {
                         if (widthSizeClass == WindowWidthSizeClass.Compact) {
                             NavigationBar {
                                 NavigationBarItem(
-                                    selected = currentRoute == "list",
+                                    selected = currentRoute == "list" || currentRoute == "detail",
                                     onClick = { currentRoute = "list" },
                                     icon = { Icon(Icons.Default.Home, stringResource(R.string.nav_games)) },
                                     label = { Text(stringResource(R.string.nav_games)) }
                                 )
                                 NavigationBarItem(
-                                    selected = currentRoute == "favs",
+                                    selected = currentRoute == "favs" || currentRoute == "detail_fav",
                                     onClick = { currentRoute = "favs" },
                                     icon = { Icon(Icons.Default.Star, stringResource(R.string.nav_favs)) },
                                     label = { Text(stringResource(R.string.nav_favs)) }
@@ -87,52 +91,46 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { padding ->
-                    Box(modifier = Modifier.padding(padding)) {
-
+                    Box(modifier = Modifier.padding(padding).fillMaxSize()) {
                         if (widthSizeClass == WindowWidthSizeClass.Compact) {
-                            //VISTA MÓVIL
                             when (currentRoute) {
                                 "list" -> ElemListScreen(
-                                    games = games,
+                                    viewModel = viewModel,
                                     onGameClick = {
-                                        selectedGameId = it.id
+                                        selectedGame = it
                                         currentRoute = "detail"
-                                    },
-                                    onFavToggle = onFavToggle
+                                    }
                                 )
                                 "detail" -> {
-                                    val game = games.find { it.id == selectedGameId }
                                     Column {
-                                        Button(onClick = { currentRoute = "list" }, modifier = Modifier.padding(8.dp)) {
-                                            Text(stringResource(R.string.back_to_list))
+                                        IconButton(onClick = { currentRoute = "list" }) {
+                                            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                                         }
-                                        DetailItemScreen(game, onFavToggle)
+                                        DetailItemScreen(selectedGame, viewModel)
                                     }
                                 }
                                 "favs" -> FavListScreen(
-                                    games = games,
+                                    viewModel = viewModel,
                                     onGameClick = {
-                                        selectedGameId = it.id
+                                        selectedFav = it
                                         currentRoute = "detail_fav"
-                                    },
-                                    onRemoveFav = onFavToggle
+                                    }
                                 )
                                 "detail_fav" -> {
-                                    val game = games.find { it.id == selectedGameId }
-                                    if (game != null) {
+                                    if (selectedFav != null) {
                                         Column {
-                                            Button(onClick = { currentRoute = "favs" }, modifier = Modifier.padding(8.dp)) {
-                                                Text(stringResource(R.string.back_to_favs))
+                                            IconButton(onClick = { currentRoute = "favs" }) {
+                                                Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                                             }
-                                            DetailFavScreen(game)
+                                            DetailFavScreen(selectedFav!!, viewModel)
                                         }
                                     }
                                 }
-                                "profile" -> ProfileScreen()
+                                "profile" -> ProfileScreen(viewModel)
                                 "about" -> AboutScreen()
                             }
                         } else {
-                            //VISTA TABLET
+                            // VISTA TABLET
                             Row(Modifier.fillMaxSize()) {
                                 NavigationRail {
                                     Spacer(Modifier.weight(1f))
@@ -140,25 +138,25 @@ class MainActivity : ComponentActivity() {
                                         selected = currentRoute == "list",
                                         onClick = { currentRoute = "list" },
                                         icon = { Icon(Icons.Default.Home, "") },
-                                        label = { Text(stringResource(R.string.nav_rail_home)) }
+                                        label = { Text("Juegos") }
                                     )
                                     NavigationRailItem(
                                         selected = currentRoute == "favs",
                                         onClick = { currentRoute = "favs" },
                                         icon = { Icon(Icons.Default.Star, "") },
-                                        label = { Text(stringResource(R.string.nav_rail_favs)) }
+                                        label = { Text("Favoritos") }
                                     )
                                     NavigationRailItem(
                                         selected = currentRoute == "profile",
                                         onClick = { currentRoute = "profile" },
                                         icon = { Icon(Icons.Default.Person, "") },
-                                        label = { Text(stringResource(R.string.nav_profile)) }
+                                        label = { Text("Perfil") }
                                     )
                                     NavigationRailItem(
                                         selected = currentRoute == "about",
                                         onClick = { currentRoute = "about" },
                                         icon = { Icon(Icons.Default.Info, "") },
-                                        label = { Text(stringResource(R.string.nav_info)) }
+                                        label = { Text("Info") }
                                     )
                                     Spacer(Modifier.weight(1f))
                                 }
@@ -168,30 +166,27 @@ class MainActivity : ComponentActivity() {
                                         "list" -> {
                                             Row {
                                                 Box(Modifier.weight(1f)) {
-                                                    ElemListScreen(games, onGameClick = { selectedGameId = it.id }, onFavToggle)
+                                                    ElemListScreen(viewModel) { selectedGame = it }
                                                 }
                                                 Box(Modifier.weight(1f).padding(16.dp)) {
-                                                    val game = games.find { it.id == selectedGameId }
-                                                    if (game != null) DetailItemScreen(game, onFavToggle)
-                                                    else Text(stringResource(R.string.select_game_hint), Modifier.align(Alignment.Center))
+                                                    if (selectedGame != null) DetailItemScreen(selectedGame, viewModel)
+                                                    else Text("Selecciona un juego", Modifier.align(Alignment.Center))
                                                 }
                                             }
                                         }
                                         "favs" -> {
                                             Row {
                                                 Box(Modifier.weight(1f)) {
-                                                    FavListScreen(games, { selectedGameId = it.id }, onRemoveFav = onFavToggle)
+                                                    FavListScreen(viewModel) { selectedFav = it }
                                                 }
                                                 Box(Modifier.weight(1f).padding(16.dp)) {
-                                                    val game = games.find { it.id == selectedGameId }
-                                                    if (game != null) DetailFavScreen(game)
-                                                    else Text(stringResource(R.string.select_fav_hint), Modifier.align(Alignment.Center))
+                                                    if (selectedFav != null) DetailFavScreen(selectedFav!!, viewModel)
+                                                    else Text("Selecciona un favorito", Modifier.align(Alignment.Center))
                                                 }
                                             }
                                         }
-                                        "profile" -> ProfileScreen()
+                                        "profile" -> ProfileScreen(viewModel)
                                         "about" -> AboutScreen()
-                                        else -> AboutScreen()
                                     }
                                 }
                             }

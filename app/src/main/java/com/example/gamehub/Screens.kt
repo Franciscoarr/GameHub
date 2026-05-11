@@ -20,254 +20,194 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.gamehub.model.Game
+import com.example.gamehub.model.*
+import com.example.gamehub.ui.GameViewModel
+import kotlinx.coroutines.launch
 
-//1. ElemListScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ElemListScreen(
-    games: List<Game>,
-    onGameClick: (Game) -> Unit,
-    onFavToggle: (Int) -> Unit
+    viewModel: GameViewModel,
+    onGameClick: (IGDBGame) -> Unit
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    var showRemoveDialog by remember { mutableStateOf(false) }
-    var gameToRemove by remember { mutableStateOf<Game?>(null) }
+    val games by viewModel.apiGames.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    val context = LocalContext.current
-
-    val filteredGames = games.filter { game ->
-        val title = context.getString(game.titleRes)
-        // CAMBIO: Usamos startsWith para filtrar por la primera letra/comienzo
-        title.startsWith(searchQuery, ignoreCase = true)
+    LaunchedEffect(Unit) {
+        if (games.isEmpty()) {
+            // Nota: El usuario debe proveer sus credenciales de IGDB. 
+            // Usando valores por defecto o vacíos por ahora.
+            viewModel.fetchGames("TU_CLIENT_ID", "TU_ACCESS_TOKEN")
+        }
     }
 
-    if (showRemoveDialog && gameToRemove != null) {
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+        if (isLoading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(contentPadding = PaddingValues(bottom = 80.dp), modifier = Modifier.padding(padding)) {
+                items(games) { game ->
+                    val isFav by viewModel.isFavorite(game.id).collectAsState(initial = false)
+                    GameCard(
+                        game = game,
+                        isFavorite = isFav,
+                        onClick = { onGameClick(game) },
+                        onFavClick = {
+                            if (isFav) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("El elemento ya está guardado como favorito")
+                                }
+                            } else {
+                                viewModel.addFavorite(game)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DetailItemScreen(game: IGDBGame?, viewModel: GameViewModel) {
+    if (game == null) return
+    val isFav by viewModel.isFavorite(game.id).collectAsState(initial = false)
+
+    Column(Modifier.padding(24.dp).fillMaxSize().verticalScroll(rememberScrollState())) {
+        Text(text = game.name, style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = "Géneros: ${game.genres?.joinToString(", ") { it.name } ?: "N/A"}",
+            style = MaterialTheme.typography.labelLarge,
+            color = Color.Gray
+        )
+        Spacer(Modifier.height(8.dp))
+
+        Button(
+            onClick = { if (!isFav) viewModel.addFavorite(game) },
+            enabled = !isFav
+        ) {
+            Icon(if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder, null)
+            Spacer(Modifier.width(8.dp))
+            Text(if (isFav) "Guardado en Favoritos" else "Añadir a Favoritos")
+        }
+
+        Spacer(Modifier.height(16.dp))
+        Text(text = game.summary ?: "Sin resumen disponible.", style = MaterialTheme.typography.bodyLarge)
+        if (game.storyline != null) {
+            Spacer(Modifier.height(16.dp))
+            Text(text = "Historia", style = MaterialTheme.typography.titleMedium)
+            Text(text = game.storyline, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+@Composable
+fun FavListScreen(
+    viewModel: GameViewModel,
+    onGameClick: (FavoriteGame) -> Unit
+) {
+    val favorites by viewModel.favoriteGames.collectAsState()
+    var gameToDelete by remember { mutableStateOf<FavoriteGame?>(null) }
+
+    if (gameToDelete != null) {
         AlertDialog(
-            onDismissRequest = { showRemoveDialog = false },
-            title = { Text(stringResource(R.string.remove_fav_title)) },
-            text = { Text(stringResource(R.string.remove_fav_msg, stringResource(gameToRemove!!.titleRes))) },
+            onDismissRequest = { gameToDelete = null },
+            title = { Text("Confirmar borrado") },
+            text = { Text("¿Estás seguro de que quieres eliminar '${gameToDelete!!.name}' de tus favoritos?") },
             confirmButton = {
                 TextButton(onClick = {
-                    onFavToggle(gameToRemove!!.id)
-                    showRemoveDialog = false
-                    gameToRemove = null
+                    viewModel.removeFavorite(gameToDelete!!)
+                    gameToDelete = null
                 }) {
-                    Text(stringResource(R.string.delete), color = colorResource(R.color.gh_red))
+                    Text("Eliminar", color = Color.Red)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showRemoveDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
+                TextButton(onClick = { gameToDelete = null }) { Text("Cancelar") }
             }
         )
     }
 
-    Column(Modifier.fillMaxSize()) {
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            label = { Text(stringResource(R.string.search_placeholder)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            leadingIcon = { Icon(Icons.Default.Search, "") },
-            singleLine = true,
-            shape = MaterialTheme.shapes.medium
-        )
-
+    if (favorites.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No tienes juegos favoritos")
+        }
+    } else {
         LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
-            items(filteredGames) { game ->
-                GameCard(
+            items(favorites) { game ->
+                FavoriteGameCard(
                     game = game,
                     onClick = { onGameClick(game) },
-                    onFavClick = {
-                        if (game.isFavorite) {
-                            gameToRemove = game
-                            showRemoveDialog = true
-                        } else {
-                            onFavToggle(game.id)
-                        }
-                    }
+                    onDeleteClick = { gameToDelete = game }
                 )
             }
         }
     }
 }
 
-//2. FavListScreen
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavListScreen(
-    games: List<Game>,
-    onGameClick: (Game) -> Unit,
-    onRemoveFav: (Int) -> Unit
-) {
-    var searchQuery by remember { mutableStateOf("") }
-    val context = LocalContext.current
+fun DetailFavScreen(game: FavoriteGame, viewModel: GameViewModel) {
+    val comments by viewModel.getComments(game.id).collectAsState(initial = emptyList())
+    var showCommentDialog by remember { mutableStateOf(false) }
+    var newComment by remember { mutableStateOf("") }
 
-    val favs = games.filter { game ->
-        val isFav = game.isFavorite
-        val title = context.getString(game.titleRes)
-
-        // CAMBIO: Usamos startsWith también aquí
-        isFav && title.startsWith(searchQuery, ignoreCase = true)
-    }
-
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var gameToDeleteId by remember { mutableStateOf<Int?>(null) }
-
-    if (showDeleteDialog && gameToDeleteId != null) {
+    if (showCommentDialog) {
         AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text(stringResource(R.string.remove_fav_confirm_title)) },
-            text = { Text(stringResource(R.string.remove_fav_confirm_msg)) },
+            onDismissRequest = { showCommentDialog = false },
+            title = { Text("Nuevo comentario") },
+            text = {
+                OutlinedTextField(
+                    value = newComment,
+                    onValueChange = { newComment = it },
+                    label = { Text("Tu comentario") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
-                    onRemoveFav(gameToDeleteId!!)
-                    showDeleteDialog = false
-                    gameToDeleteId = null
-                }) {
-                    Text(stringResource(R.string.yes_delete), color = colorResource(R.color.gh_red))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text(stringResource(R.string.cancel)) }
-            }
-        )
-    }
-
-    Column(Modifier.fillMaxSize()) {
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            label = { Text(stringResource(R.string.search_placeholder)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            leadingIcon = { Icon(Icons.Default.Search, "") },
-            singleLine = true,
-            shape = MaterialTheme.shapes.medium
-        )
-
-        if (favs.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                if (searchQuery.isEmpty()) {
-                    Text(stringResource(R.string.no_favs_yet))
-                } else {
-                    Text("No hay resultados que empiecen por \"$searchQuery\"")
-                }
-            }
-        } else {
-            LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
-                items(favs) { game ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        GameCard(
-                            game = game,
-                            onClick = { onGameClick(game) },
-                            onFavClick = {
-                                gameToDeleteId = game.id
-                                showDeleteDialog = true
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(onClick = {
-                            gameToDeleteId = game.id
-                            showDeleteDialog = true
-                        }) {
-                            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = colorResource(R.color.gh_red))
-                        }
+                    if (newComment.isNotBlank()) {
+                        viewModel.addComment(game.id, newComment)
+                        newComment = ""
+                        showCommentDialog = false
                     }
-                }
-            }
-        }
-    }
-}
-
-//3. DetailItemScreen
-@Composable
-fun DetailItemScreen(game: Game?, onFavToggle: (Int) -> Unit) {
-    if (game == null) return
-
-    var showRemoveDialog by remember { mutableStateOf(false) }
-
-    if (showRemoveDialog) {
-        AlertDialog(
-            onDismissRequest = { showRemoveDialog = false },
-            title = { Text(stringResource(R.string.remove_fav_title)) },
-            text = { Text(stringResource(R.string.remove_fav_detail_msg, stringResource(game.titleRes))) },
-            confirmButton = {
-                TextButton(onClick = {
-                    onFavToggle(game.id)
-                    showRemoveDialog = false
-                }) {
-                    Text(stringResource(R.string.delete), color = colorResource(R.color.gh_red))
-                }
+                }) { Text("Publicar") }
             },
             dismissButton = {
-                TextButton(onClick = { showRemoveDialog = false }) { Text(stringResource(R.string.cancel)) }
+                TextButton(onClick = { showCommentDialog = false }) { Text("Cancelar") }
             }
         )
     }
 
-    Column(Modifier.padding(24.dp).fillMaxSize().verticalScroll(rememberScrollState())) {
-        Text(text = stringResource(game.titleRes), style = MaterialTheme.typography.headlineMedium)
-        Text(text = stringResource(R.string.genre_label, stringResource(game.genreRes)), style = MaterialTheme.typography.labelLarge, color = Color.Gray)
-        Spacer(Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                if (game.isFavorite) {
-                    showRemoveDialog = true
-                } else {
-                    onFavToggle(game.id)
-                }
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (game.isFavorite) colorResource(R.color.gh_blue) else MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Icon(
-                if (game.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(if (game.isFavorite) stringResource(R.string.fav_remove_btn) else stringResource(R.string.fav_add_btn))
-        }
-
-        Spacer(Modifier.height(16.dp))
-        Text(text = stringResource(game.descriptionRes), style = MaterialTheme.typography.bodyLarge)
-    }
-}
-
-//4. DetailFavScreen
-@Composable
-fun DetailFavScreen(game: Game) {
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /* Lógica añadir comentario */ },
-                containerColor = colorResource(R.color.gh_highlight)
-            ) {
-                Icon(Icons.Default.AddComment, contentDescription = stringResource(R.string.add_comment_desc), tint = Color.Black)
+            FloatingActionButton(onClick = { showCommentDialog = true }) {
+                Icon(Icons.Default.AddComment, "Añadir comentario")
             }
         }
     ) { padding ->
-        Column(Modifier.padding(padding).padding(16.dp)) {
-            Text(stringResource(game.titleRes), style = MaterialTheme.typography.headlineMedium)
-            Divider(Modifier.padding(vertical = 8.dp))
-            Text(stringResource(R.string.comments_title), style = MaterialTheme.typography.titleMedium)
-            LazyColumn {
-                items(game.commentsRes) { commentResId ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                    ) {
-                        Text(stringResource(commentResId), modifier = Modifier.padding(12.dp))
+        Column(Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState())) {
+            Text(game.name, style = MaterialTheme.typography.headlineMedium)
+            Text("Rating: ${game.rating}", style = MaterialTheme.typography.titleSmall, color = colorResource(R.color.gh_favorite))
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            Text(game.summary, style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.height(16.dp))
+            Text("Comentarios", style = MaterialTheme.typography.titleLarge)
+            
+            comments.forEach { comment ->
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Column(Modifier.padding(12.dp)) {
+                        Text(comment.userName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
+                        Text(comment.content, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -275,32 +215,52 @@ fun DetailFavScreen(game: Game) {
     }
 }
 
-//5. ProfileScreen
 @Composable
-fun ProfileScreen() {
-    var isLoggedIn by remember { mutableStateOf(false) }
+fun ProfileScreen(viewModel: GameViewModel) {
+    val settings by viewModel.userSettings.collectAsState()
+    var tempName by remember { mutableStateOf(settings.username) }
+
+    LaunchedEffect(settings.username) {
+        tempName = settings.username
+    }
+
     Column(
-        Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(100.dp))
+        Icon(Icons.Default.Person, null, modifier = Modifier.size(100.dp))
         Spacer(Modifier.height(16.dp))
-        Text(if (isLoggedIn) stringResource(R.string.user_profile) else stringResource(R.string.guest_user), style = MaterialTheme.typography.headlineMedium)
+        
+        OutlinedTextField(
+            value = tempName,
+            onValueChange = { tempName = it },
+            label = { Text("Nombre de usuario") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        
         Spacer(Modifier.height(16.dp))
-
-        Button(
-            onClick = { isLoggedIn = !isLoggedIn },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isLoggedIn) colorResource(R.color.gh_surface_dark) else MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Text(if (isLoggedIn) stringResource(R.string.logout) else stringResource(R.string.login))
+        Text("Tema de la aplicación", style = MaterialTheme.typography.titleMedium)
+        
+        AppTheme.values().forEach { theme ->
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = settings.theme == theme,
+                    onClick = { viewModel.updateSettings(tempName, theme) }
+                )
+                Text(theme.name, modifier = Modifier.padding(start = 8.dp))
+            }
+        }
+        
+        Spacer(Modifier.height(24.dp))
+        Button(onClick = { viewModel.updateSettings(tempName, settings.theme) }) {
+            Text("Guardar Cambios")
         }
     }
 }
 
-//6. AboutScreen
 @Composable
 fun AboutScreen() {
     val scroll = rememberScrollState()
@@ -320,8 +280,7 @@ fun AboutScreen() {
     ) {
         Text(
             text = stringResource(id = R.string.app_name),
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center,
             color = colorResource(R.color.gh_blue)
         )
@@ -349,13 +308,7 @@ fun AboutScreen() {
         Spacer(Modifier.height(32.dp))
 
         ExtendedFloatingActionButton(
-            icon = {
-                Icon(
-                    Icons.Filled.Email,
-                    contentDescription = stringResource(id = R.string.email_icon_desc),
-                    tint = Color.White
-                )
-            },
+            icon = { Icon(Icons.Filled.Email, contentDescription = null, tint = Color.White) },
             text = { Text(stringResource(id = R.string.cta_contacto_info), color = Color.White) },
             onClick = {
                 val intent = Intent(Intent.ACTION_SENDTO).apply {

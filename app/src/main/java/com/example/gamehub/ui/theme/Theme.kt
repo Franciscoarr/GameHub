@@ -3,8 +3,10 @@ package com.example.gamehub.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.example.gamehub.model.AppTheme
 
 public val BlueGH = Color(0xFF0D47A1)
 public val RedGH = Color(0xFFD32F2F)
@@ -18,29 +20,33 @@ val FavoriteGH = Color(0xFFFFC107)
 private val GameHubDarkColors = darkColorScheme(
     primary = BlueGH,
     onPrimary = Color.White,
-    primaryContainer = BlueGH,
-
     secondary = RedGH,
-    onSecondary = Color.White,
-    secondaryContainer = RedGH,
-
     tertiary = HighlightGH,
-    onTertiary = Color.Black,
-    tertiaryContainer = HighlightGH,
-
     background = BlackGH,
-    onBackground = Color.White,
+    surface = SurfaceDarkGH
+)
 
-    surface = SurfaceDarkGH,
-    onSurface = Color.White
+private val GameHubLightColors = lightColorScheme(
+    primary = BlueGH,
+    onPrimary = Color.White,
+    secondary = RedGH,
+    tertiary = HighlightGH,
+    background = Color.White,
+    surface = Color(0xFFF5F5F5)
 )
 
 @Composable
 fun GameHubTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    appTheme: AppTheme = AppTheme.SYSTEM,
     content: @Composable () -> Unit
 ) {
-    val colors = GameHubDarkColors
+    val darkTheme = when (appTheme) {
+        AppTheme.LIGHT -> false
+        AppTheme.DARK -> true
+        AppTheme.SYSTEM -> isSystemInDarkTheme()
+    }
+
+    val colors = if (darkTheme) GameHubDarkColors else GameHubLightColors
 
     MaterialTheme(
         colorScheme = colors,
