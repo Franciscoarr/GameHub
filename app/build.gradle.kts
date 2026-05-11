@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.compose.material3.window.size.class1)
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
+    implementation(libs.material)
 
     // Room
     implementation(libs.room.runtime)

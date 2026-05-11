@@ -43,7 +43,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "gamehub_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration() // Evita crashes por cambios de esquema durante desarrollo
+                .build()
                 INSTANCE = instance
                 instance
             }

@@ -35,39 +35,104 @@ fun ElemListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    var searchQuery by remember { mutableStateOf("") }
+    var showFilterMenu by remember { mutableStateOf(false) }
+
+    val filteredGames = remember(games, searchQuery) {
+        games.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    }
+
     LaunchedEffect(Unit) {
         if (games.isEmpty()) {
-            // Nota: El usuario debe proveer sus credenciales de IGDB. 
-            // Usando valores por defecto o vacíos por ahora.
-            viewModel.fetchGames("TU_CLIENT_ID", "TU_ACCESS_TOKEN")
+            // Nota: El usuario debe proveer sus credenciales de IGDB.
+            viewModel.fetchGames("r8whdk1mqz289smnfdrgvh5xl2889k", "dt4pg3zypr49c8bxvm5dudmm5akkrm")
         }
     }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        if (isLoading) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(contentPadding = PaddingValues(bottom = 80.dp), modifier = Modifier.padding(padding)) {
-                items(games) { game ->
-                    val isFav by viewModel.isFavorite(game.id).collectAsState(initial = false)
-                    GameCard(
-                        game = game,
-                        isFavorite = isFav,
-                        onClick = { onGameClick(game) },
-                        onFavClick = {
-                            if (isFav) {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar("El elemento ya está guardado como favorito")
-                                }
-                            } else {
-                                viewModel.addFavorite(game)
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            // Barra de búsqueda y Filtros
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Buscar juegos...") },
+                    modifier = Modifier.weight(1f),
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Close, contentDescription = "Limpiar")
                             }
                         }
-                    )
+                    },
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.medium
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Box {
+                    IconButton(onClick = { showFilterMenu = !showFilterMenu }) {
+                        Icon(Icons.Default.FilterList, contentDescription = "Filtros")
+                    }
+                    DropdownMenu(
+                        expanded = showFilterMenu,
+                        onDismissRequest = { showFilterMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Más valorados") },
+                            onClick = { showFilterMenu = false },
+                            leadingIcon = { Icon(Icons.Default.Star, null) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Nombre (A-Z)") },
+                            onClick = { showFilterMenu = false },
+                            leadingIcon = { Icon(Icons.Default.SortByAlpha, null) }
+                        )
+                    }
+                }
+            }
+
+            if (isLoading) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                if (filteredGames.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No se encontraron juegos", style = MaterialTheme.typography.bodyLarge)
+                    }
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(bottom = 80.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(filteredGames) { game ->
+                            val isFav by viewModel.isFavorite(game.id).collectAsState(initial = false)
+                            GameCard(
+                                game = game,
+                                isFavorite = isFav,
+                                onClick = { onGameClick(game) },
+                                onFavClick = {
+                                    if (isFav) {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("El elemento ya está guardado como favorito")
+                                        }
+                                    } else {
+                                        viewModel.addFavorite(game)
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -199,7 +264,7 @@ fun DetailFavScreen(game: FavoriteGame, viewModel: GameViewModel) {
             Text(game.summary, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(16.dp))
             Text("Comentarios", style = MaterialTheme.typography.titleLarge)
-            
+
             comments.forEach { comment ->
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -230,17 +295,17 @@ fun ProfileScreen(viewModel: GameViewModel) {
     ) {
         Icon(Icons.Default.Person, null, modifier = Modifier.size(100.dp))
         Spacer(Modifier.height(16.dp))
-        
+
         OutlinedTextField(
             value = tempName,
             onValueChange = { tempName = it },
             label = { Text("Nombre de usuario") },
             modifier = Modifier.fillMaxWidth()
         )
-        
+
         Spacer(Modifier.height(16.dp))
         Text("Tema de la aplicación", style = MaterialTheme.typography.titleMedium)
-        
+
         AppTheme.values().forEach { theme ->
             Row(
                 Modifier.fillMaxWidth().padding(vertical = 4.dp),
