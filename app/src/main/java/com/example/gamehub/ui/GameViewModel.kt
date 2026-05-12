@@ -15,7 +15,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = db.gameDao()
     private val dataStoreManager = DataStoreManager(application)
 
-    // DataStore Settings
     val userSettings: StateFlow<UserSettings> = dataStoreManager.settingsFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UserSettings("Invitado", AppTheme.SYSTEM))
 
@@ -25,24 +24,29 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // API Data
     private val _apiGames = MutableStateFlow<List<IGDBGame>>(emptyList())
     val apiGames: StateFlow<List<IGDBGame>> = _apiGames.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _isLoggedIn = MutableStateFlow(false)
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+
+    fun setLoginState(isLogged: Boolean) {
+        _isLoggedIn.value = isLogged
+    }
+
     fun fetchGames(clientId: String, token: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val query = "fields name,summary,storyline,rating,cover.url,genres.name; limit 20;"
+                val query = "fields name,summary,storyline,rating,cover.url,genres.name; where rating != null; sort rating desc; limit 100;"
                 val requestBody = query.toRequestBody("text/plain".toMediaTypeOrNull())
 
                 val result = RetrofitInstance.api.getGames(clientId, "Bearer $token", requestBody)
                 _apiGames.value = result
             } catch (e: Exception) {
-                // FALLBACK: Si falla la API (por llaves vacías), cargamos datos de prueba para que la app funcione
                 _apiGames.value = listOf(
                     IGDBGame(1, "The Witcher 3", "Un RPG épico de mundo abierto.", null, null, 9.8, "Historia de Geralt"),
                     IGDBGame(2, "Elden Ring", "Aventura desafiante en las Tierras Intermedias.", null, null, 9.5, null),
@@ -54,7 +58,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Local DB (Favorites)
     val favoriteGames: StateFlow<List<FavoriteGame>> = dao.getAllFavorites()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -80,13 +83,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Comments
     fun getComments(gameId: Long): Flow<List<Comment>> = dao.getCommentsForGame(gameId)
 
     fun addComment(gameId: Long, content: String) {
         viewModelScope.launch {
             val username = userSettings.value.username
             dao.insertComment(Comment(gameId = gameId, userName = username, content = content))
+        }
+    }
+
+    fun deleteComment(comment: Comment) {
+        viewModelScope.launch {
+            dao.deleteComment(comment)
         }
     }
 }

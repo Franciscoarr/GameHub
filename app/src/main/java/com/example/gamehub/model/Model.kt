@@ -4,8 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
-// --- API Models (IGDB) ---
-
 data class IGDBGame(
     val id: Long,
     val name: String,
@@ -26,8 +24,6 @@ data class IGDBGenre(
     val name: String
 )
 
-// --- Room Entities ---
-
 @Entity(tableName = "favorite_games")
 data class FavoriteGame(
     @PrimaryKey val id: Long,
@@ -35,7 +31,7 @@ data class FavoriteGame(
     val summary: String,
     val imageUrl: String,
     val rating: Double,
-    val genres: String // Almacenado como string separado por comas
+    val genres: String
 )
 
 @Entity(tableName = "comments")
@@ -46,8 +42,6 @@ data class Comment(
     val content: String,
     val timestamp: Long = System.currentTimeMillis()
 )
-
-// --- DataStore Model ---
 
 enum class AppTheme {
     LIGHT, DARK, SYSTEM

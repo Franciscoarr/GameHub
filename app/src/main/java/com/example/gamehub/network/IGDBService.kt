@@ -20,9 +20,12 @@ interface IGDBService {
 object RetrofitInstance {
     private const val BASE_URL = "https://api.igdb.com/v4/"
 
+    private val client = okhttp3.OkHttpClient.Builder().build()
+
     val api: IGDBService by lazy {
         retrofit2.Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(client)
             .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
             .build()
             .create(IGDBService::class.java)

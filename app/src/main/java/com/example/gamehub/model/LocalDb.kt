@@ -27,6 +27,9 @@ interface GameDao {
 
     @Insert
     suspend fun insertComment(comment: Comment)
+
+    @Delete
+    suspend fun deleteComment(comment: Comment)
 }
 
 @Database(entities = [FavoriteGame::class, Comment::class], version = 1)
@@ -44,7 +47,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "gamehub_database"
                 )
-                .fallbackToDestructiveMigration() // Evita crashes por cambios de esquema durante desarrollo
+                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance

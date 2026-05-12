@@ -37,23 +37,28 @@ fun ElemListScreen(
 
     var searchQuery by remember { mutableStateOf("") }
     var showFilterMenu by remember { mutableStateOf(false) }
+    var sortOption by remember { mutableStateOf("NONE") }
 
-    val filteredGames = remember(games, searchQuery) {
-        games.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    val filteredGames = remember(games, searchQuery, sortOption) {
+        val filtered = games.filter { it.name.contains(searchQuery, ignoreCase = true) }
+        when (sortOption) {
+            "RATING" -> filtered.sortedByDescending { it.rating ?: 0.0 }
+            "NAME" -> filtered.sortedBy { it.name }
+            else -> filtered
+        }
     }
 
     LaunchedEffect(Unit) {
         if (games.isEmpty()) {
-            // Nota: El usuario debe proveer sus credenciales de IGDB.
             viewModel.fetchGames("r8whdk1mqz289smnfdrgvh5xl2889k", "dt4pg3zypr49c8bxvm5dudmm5akkrm")
         }
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            // Barra de búsqueda y Filtros
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,12 +94,18 @@ fun ElemListScreen(
                     ) {
                         DropdownMenuItem(
                             text = { Text("Más valorados") },
-                            onClick = { showFilterMenu = false },
+                            onClick = {
+                                sortOption = "RATING"
+                                showFilterMenu = false
+                            },
                             leadingIcon = { Icon(Icons.Default.Star, null) }
                         )
                         DropdownMenuItem(
                             text = { Text("Nombre (A-Z)") },
-                            onClick = { showFilterMenu = false },
+                            onClick = {
+                                sortOption = "NAME"
+                                showFilterMenu = false
+                            },
                             leadingIcon = { Icon(Icons.Default.SortByAlpha, null) }
                         )
                     }
@@ -220,8 +231,13 @@ fun FavListScreen(
 @Composable
 fun DetailFavScreen(game: FavoriteGame, viewModel: GameViewModel) {
     val comments by viewModel.getComments(game.id).collectAsState(initial = emptyList())
+    val settings by viewModel.userSettings.collectAsState()
+    val currentUsername = settings.username
+
     var showCommentDialog by remember { mutableStateOf(false) }
     var newComment by remember { mutableStateOf("") }
+
+    var commentToDelete by remember { mutableStateOf<Comment?>(null) }
 
     if (showCommentDialog) {
         AlertDialog(
@@ -250,12 +266,30 @@ fun DetailFavScreen(game: FavoriteGame, viewModel: GameViewModel) {
         )
     }
 
+    if (commentToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { commentToDelete = null },
+            title = { Text("Eliminar comentario") },
+            text = { Text("¿Estás seguro de que quieres eliminar tu comentario?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteComment(commentToDelete!!)
+                    commentToDelete = null
+                }) { Text("Eliminar", color = Color.Red) }
+            },
+            dismissButton = {
+                TextButton(onClick = { commentToDelete = null }) { Text("Cancelar") }
+            }
+        )
+    }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = { showCommentDialog = true }) {
                 Icon(Icons.Default.AddComment, "Añadir comentario")
             }
-        }
+        },
+        contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
     ) { padding ->
         Column(Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState())) {
             Text(game.name, style = MaterialTheme.typography.headlineMedium)
@@ -270,9 +304,21 @@ fun DetailFavScreen(game: FavoriteGame, viewModel: GameViewModel) {
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(comment.userName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
-                        Text(comment.content, style = MaterialTheme.typography.bodyMedium)
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(comment.userName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
+                            Text(comment.content, style = MaterialTheme.typography.bodyMedium)
+                        }
+
+                        if (comment.userName == currentUsername) {
+                            IconButton(onClick = { commentToDelete = comment }) {
+                                Icon(Icons.Default.Close, contentDescription = "Eliminar comentario", tint = Color.Gray)
+                            }
+                        }
                     }
                 }
             }
@@ -285,43 +331,97 @@ fun ProfileScreen(viewModel: GameViewModel) {
     val settings by viewModel.userSettings.collectAsState()
     var tempName by remember { mutableStateOf(settings.username) }
 
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(settings.username) {
         tempName = settings.username
     }
 
-    Column(
-        Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(Icons.Default.Person, null, modifier = Modifier.size(100.dp))
-        Spacer(Modifier.height(16.dp))
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
+    ) { padding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(Icons.Default.Person, null, modifier = Modifier.size(100.dp))
+            Spacer(Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = tempName,
-            onValueChange = { tempName = it },
-            label = { Text("Nombre de usuario") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = tempName,
+                onValueChange = { tempName = it },
+                label = { Text("Nombre de usuario") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(Modifier.height(16.dp))
-        Text("Tema de la aplicación", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(16.dp))
 
-        AppTheme.values().forEach { theme ->
-            Row(
-                Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = settings.theme == theme,
-                    onClick = { viewModel.updateSettings(tempName, theme) }
-                )
-                Text(theme.name, modifier = Modifier.padding(start = 8.dp))
+            if (!isLoggedIn) {
+                Button(
+                    onClick = {
+                        viewModel.setLoginState(true)
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Sesión iniciada como: $tempName")
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Login")
+                }
+            } else {
+                Text("Tema de la aplicación", style = MaterialTheme.typography.titleMedium)
+
+                AppTheme.values().forEach { theme ->
+                    Row(
+                        Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = settings.theme == theme,
+                            onClick = {
+                                viewModel.updateSettings(tempName, theme)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Tema cambiado a: ${theme.name}")
+                                }
+                            }
+                        )
+                        Text(theme.name, modifier = Modifier.padding(start = 8.dp))
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(onClick = {
+                        viewModel.updateSettings(tempName, settings.theme)
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Nombre de usuario actualizado")
+                        }
+                    }) {
+                        Text("Guardar")
+                    }
+
+                    OutlinedButton(onClick = {
+                        viewModel.setLoginState(false)
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Sesión cerrada")
+                        }
+                    }) {
+                        Text("Logout")
+                    }
+                }
             }
-        }
-        
-        Spacer(Modifier.height(24.dp))
-        Button(onClick = { viewModel.updateSettings(tempName, settings.theme) }) {
-            Text("Guardar Cambios")
         }
     }
 }
